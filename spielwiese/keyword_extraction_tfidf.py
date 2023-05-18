@@ -1,22 +1,20 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from text_preprocessing import get_stopwords, preprocess_text
+from text_preprocessing import get_stopwords, clean
 
 
-def get_top_n_keywords(text, n, stop_words=None):
+def get_top_n_keywords(text, n=5, stop_words=None):
     if stop_words is None:
         stop_words = get_stopwords("english", "german")
-    tokens = preprocess_text(text, stop_words)
-    kw_scores = get_keyword_scores(tokens)
+    text_cleaned = clean(text, stop_words)
+    kw_scores = get_keyword_scores(text_cleaned)
     return [item[0] for item in sorted(kw_scores.items(), key=lambda item: item[1], reverse=True)][:n]
 
 
-def get_keyword_scores(tokens):
+def get_keyword_scores(text):
     """
     Returns a dict mapping each unique token to its TF-IDF score
     """
-    # Join tokens back into a string
-    text = ' '.join(tokens)
     # Create the TF-IDF vectorizer
     vectorizer = TfidfVectorizer()
     # Compute TF-IDF scores

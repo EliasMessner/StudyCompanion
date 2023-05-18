@@ -3,6 +3,10 @@ import string
 import nltk
 
 
+def clean(text, stop_words):
+    return ' '.join(preprocess_text(text, stop_words))
+
+
 def get_stopwords(*languages):
     return [sw for lang in languages for sw in nltk.corpus.stopwords.words(lang)]
 
