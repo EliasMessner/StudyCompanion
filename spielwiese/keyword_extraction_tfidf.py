@@ -4,26 +4,43 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from text_preprocessing import get_stopwords, clean
 
 
+def get_search_terms(text, uni=4, bi=4, stop_words=None) -> str:
+    """
+    Returns unigrams and bigrams
+    :param text: text to extract keywords from
+    :param uni: number of unigrams to return
+    :param bi: number of bigrams to return
+    :param stop_words: stopwords to use
+    :return: keywords as string (separated by space)
+    """
+    if stop_words is None:
+        stop_words = get_stopwords("english", "german")
+    top_bigrams = extract_keywords_from_text(text, n=bi, stop_words=stop_words, ngram_range=(2, 2))
+    top_unigrams = [unigram for unigram in extract_keywords_from_text(text, n=uni, stop_words=stop_words,  ngram_range=(1, 1))
+                    if not any(unigram in bigram for bigram in top_bigrams)]
+    return ' '.join(top_unigrams + top_bigrams)
+
+
 def extract_keywords_from_pdf(path_to_pdf, stop_words=None, n=5):
     if stop_words is None:
         stop_words = get_stopwords("german", "english")
     return extract_keywords_from_text(pdf_to_str(path_to_pdf), stop_words=stop_words, n=n)
 
 
-def extract_keywords_from_text(text, n=5, stop_words=None):
+def extract_keywords_from_text(text, n=5, stop_words=None, ngram_range=(1, 1)):
     if stop_words is None:
         stop_words = get_stopwords("english", "german")
     text_cleaned = clean(text, stop_words)
-    kw_scores = get_keyword_scores(text_cleaned)
-    return sorted(kw_scores.items(), key=lambda item: item[1], reverse=True)[:n]
+    kw_scores = get_keyword_scores(text_cleaned, ngram_range=ngram_range)
+    return [kw[0] for kw in sorted(kw_scores.items(), key=lambda item: item[1], reverse=True)][:n]
 
 
-def get_keyword_scores(text):
+def get_keyword_scores(text, ngram_range=(1, 1)):
     """
     Returns a dict mapping each unique token to its TF-IDF score
     """
     # Create the TF-IDF vectorizer
-    vectorizer = TfidfVectorizer()
+    vectorizer = TfidfVectorizer(ngram_range=ngram_range)
     # Compute TF-IDF scores
     tfidf_matrix = vectorizer.fit_transform([text])
     # Get the feature names (tokens)
