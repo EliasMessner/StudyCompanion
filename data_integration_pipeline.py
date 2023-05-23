@@ -29,7 +29,8 @@ class DataIntegrationPipeline():
 
         # load vectorstore and define embeddings to use later
         embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        self.docsearch = Pinecone.from_existing_index(index_name=index_name, embedding=embeddings)
+        self.docsearch = Pinecone.from_existing_index(
+            index_name=index_name, embedding=embeddings)
 
     def load_pdf(self, pdf_path: str):
         """
@@ -41,13 +42,14 @@ class DataIntegrationPipeline():
         # load pages from pdf
         document_pages = loader.load()
         return document_pages
-    
+
     def load_web_content(self, query: str):
         scraper = Scraper(browser="firefox")
 
         medium_post_urls = scraper.get_medium_search_results(query=query)
-        
-        web_loader = SeleniumURLLoader(urls=medium_post_urls, browser="firefox")
+
+        web_loader = SeleniumURLLoader(
+            urls=medium_post_urls, browser="firefox")
         web_content = web_loader.load()
         return web_content
 
@@ -95,3 +97,8 @@ class DataIntegrationPipeline():
             docs = [t.page_content for t in docs]
 
         return docs
+
+    def split_paragraphs(self, text):
+        # Split text into paragraphs using double line breaks
+        paragraphs = text.split('\n\n')
+        return paragraphs
