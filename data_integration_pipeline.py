@@ -7,7 +7,7 @@ import pinecone
 import os
 from dotenv import load_dotenv
 from scraper import Scraper
-from typing import List
+from typing import List, Literal
 
 load_dotenv()
 
@@ -43,13 +43,13 @@ class DataIntegrationPipeline():
         document_pages = loader.load()
         return document_pages
 
-    def load_web_content(self, query: str):
-        scraper = Scraper(browser="firefox")
+    def load_web_content(self, browser: Literal["firefox", "chrome"] = "firefox", query: str = None):
+        scraper = Scraper(browser=browser)
 
         medium_post_urls = scraper.get_medium_search_results(query=query)
 
         web_loader = SeleniumURLLoader(
-            urls=medium_post_urls, browser="firefox")
+            urls=medium_post_urls, browser=browser)
         web_content = web_loader.load()
         return web_content
 
@@ -63,16 +63,15 @@ class DataIntegrationPipeline():
         text_split = text_splitter.split_documents(document_pages)
         return text_split
 
-    def add_document_to_vectorstore(self, document_split: List[Document]):
+    def add_documents_to_vectorstore(self, documents: List[Document]):
         """
-        Creates embeddings from a splitted document and stores them in the pinecone index.
+        Creates embeddings from documents and stores them in the pinecone index.
 
-        :param document_split: The document_split array to embed and store in the index
+        :param documents: The documents array to embed and store in the index
         :return: list of ids from adding the documents into the vectorstore.
         """
-        return self.docsearch.add_documents(document_split)
+        return self.docsearch.add_documents(documents)
 
-    # for web content
     def add_text_to_vectorstore(self, text_split: List[str]):
         """
         Creates embeddings from a text and stores them in the pinecone index.
@@ -92,13 +91,24 @@ class DataIntegrationPipeline():
         :return: k most relevant documents 
         """
         docs = self.docsearch.similarity_search(query=query, k=k)
-
+        print(docs)
         if (get_raw_text):
             docs = [t.page_content for t in docs]
 
         return docs
 
-    def split_paragraphs(self, text):
+    def split_text_paragraphs(self, text: str):
         # Split text into paragraphs using double line breaks
         paragraphs = text.split('\n\n')
         return paragraphs
+
+    def split_document_paragraphs(self, document: Document) -> List[Document]:
+        new_documents = []
+        raw_text = document.page_content
+        paragraphs = self.split_text_paragraphs(raw_text)
+
+        for par in paragraphs:
+            new_documents.append(
+                Document(page_content=par, metadata=document.metadata))
+
+        return new_documents

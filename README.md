@@ -41,6 +41,7 @@ Inside the file fill in the following environment variables
 PINECONE_INDEX_NAME=""
 PINECONE_API_KEY=""
 PINECONE_API_ENV=""
+CHROME_BINARY_LOCATION ="C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
 ```
 
 ### Development workflow for virtualenv & dependency installation
