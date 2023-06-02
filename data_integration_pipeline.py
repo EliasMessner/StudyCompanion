@@ -12,6 +12,58 @@ from typing import List, Literal
 load_dotenv()
 
 
+def load_pdf(pdf_path: str):
+    """
+    :param pdf_path: file path of pdf to load
+    :return: a list of documents, one element for each page
+    """
+    loader = PyPDFLoader(pdf_path)
+
+    # load pages from pdf
+    document_pages = loader.load()
+    return document_pages
+
+
+def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None):
+    scraper = Scraper(browser=browser)
+
+    medium_post_urls = scraper.get_medium_search_results(query=query)
+
+    web_loader = SeleniumURLLoader(
+        urls=medium_post_urls, browser=browser)
+    web_content = web_loader.load()
+    return web_content
+
+
+def split_pdf(document_pages: List[Document]):
+    """
+    :param document_pages: document (as a list of pages) to split
+    :return: a list of documents, one element for each split
+    """
+    # split texts to paragraphs
+    text_splitter = NLTKTextSplitter(chunk_size=200, chunk_overlap=0)
+    text_split = text_splitter.split_documents(document_pages)
+    return text_split
+
+
+def split_text_paragraphs(text: str):
+    # Split text into paragraphs using double line breaks
+    paragraphs = text.split('\n\n')
+    return paragraphs
+
+
+def split_document_paragraphs(document: Document) -> List[Document]:
+    new_documents = []
+    raw_text = document.page_content
+    paragraphs = split_text_paragraphs(raw_text)
+
+    for par in paragraphs:
+        new_documents.append(
+            Document(page_content=par, metadata=document.metadata))
+
+    return new_documents
+
+
 class DataIntegrationPipeline:
     """Data Integration Pipeline. Loads pdf documents and stores their embeddings."""
 
@@ -31,37 +83,6 @@ class DataIntegrationPipeline:
         embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
         self.docsearch = Pinecone.from_existing_index(
             index_name=index_name, embedding=embeddings)
-
-    def load_pdf(self, pdf_path: str):
-        """
-        :param pdf_path: file path of pdf to load
-        :return: a list of documents, one element for each page
-        """
-        loader = PyPDFLoader(pdf_path)
-
-        # load pages from pdf
-        document_pages = loader.load()
-        return document_pages
-
-    def load_web_content(self, browser: Literal["firefox", "chrome"] = "firefox", query: str = None):
-        scraper = Scraper(browser=browser)
-
-        medium_post_urls = scraper.get_medium_search_results(query=query)
-
-        web_loader = SeleniumURLLoader(
-            urls=medium_post_urls, browser=browser)
-        web_content = web_loader.load()
-        return web_content
-
-    def split_pdf(self, document_pages: List[Document]):
-        """
-        :param document_pages: document (as a list of pages) to split
-        :return: a list of documents, one element for each split
-        """
-        # split texts to paragraphs
-        text_splitter = NLTKTextSplitter(chunk_size=200, chunk_overlap=0)
-        text_split = text_splitter.split_documents(document_pages)
-        return text_split
 
     def add_documents_to_vectorstore(self, documents: List[Document]):
         """
@@ -96,19 +117,3 @@ class DataIntegrationPipeline:
             docs = [t.page_content for t in docs]
 
         return docs
-
-    def split_text_paragraphs(self, text: str):
-        # Split text into paragraphs using double line breaks
-        paragraphs = text.split('\n\n')
-        return paragraphs
-
-    def split_document_paragraphs(self, document: Document) -> List[Document]:
-        new_documents = []
-        raw_text = document.page_content
-        paragraphs = self.split_text_paragraphs(raw_text)
-
-        for par in paragraphs:
-            new_documents.append(
-                Document(page_content=par, metadata=document.metadata))
-
-        return new_documents
