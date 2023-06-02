@@ -80,5 +80,5 @@ pip list --format=freeze > requirements.txt
 graph TD
   data_integration_pipeline -- uses --> keyword_extraction_tfidf;
   keyword_extraction_tfidf -- uses --> text_preprocessing;
-  data_integration_pipeline -- uses instance of --> vectorstore_controller[vectorstoreController]
+  data_integration_pipeline -- uses --> vectorstore_controller[instance of vectorstoreController];
 ```
