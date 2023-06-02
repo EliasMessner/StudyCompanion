@@ -1,23 +1,37 @@
-"""Data Integration Pipeline. Loads pdf documents, stores their embeddings, and scrapes the web for keywords."""
-
-from langchain.document_loaders import PyPDFLoader, SeleniumURLLoader
-from langchain.vectorstores import Pinecone
-from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.document_loaders import PyPDFLoader
 from langchain.schema import Document
 from langchain.text_splitter import NLTKTextSplitter
-import pinecone
-import os
-from dotenv import load_dotenv
 
 from keyword_extraction_tfidf import get_search_terms
-from pdf_handler import pdf_docs_to_str
-from scraper import Scraper
-from typing import List, Literal
-
-load_dotenv()
+from scraper import load_web_content
+from vectorstore_controller import VectorStoreController
 
 
-# TODO move to pdf_handler.py ?
+def process_pdf(pdf_path: str, vectorstore_controller: VectorStoreController):
+    """
+    load pdf and add to vector store
+    extract keywords from pdf and scrape the web
+    add scraped web content to vector store
+    """
+    # TODO add lines to notebook for demo
+    pdf_docs = load_pdf(pdf_path)
+    vectorstore_controller.add_documents_to_vectorstore(pdf_docs)
+    pdf_str = pdf_docs_to_str(pdf_docs)
+    search_query = get_search_terms(text=pdf_str)
+    web_content = load_web_content('chrome', search_query)
+    vectorstore_controller.add_documents_to_vectorstore(web_content)
+
+
+def pdf_to_str(pdf_path):
+    loader = PyPDFLoader(pdf_path)
+    documents = loader.load()
+    return pdf_docs_to_str(documents)
+
+
+def pdf_docs_to_str(pdf_docs: list[Document]):
+    return ' '.join(doc.page_content for doc in pdf_docs)
+
+
 def load_pdf(pdf_path: str):
     """
     :param pdf_path: file path of pdf to load
@@ -30,20 +44,7 @@ def load_pdf(pdf_path: str):
     return document_pages
 
 
-# TODO move to scraper.py ?
-def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None):
-    scraper = Scraper(browser=browser)
-
-    medium_post_urls = scraper.get_medium_search_results(query=query)
-
-    web_loader = SeleniumURLLoader(
-        urls=medium_post_urls, browser=browser)
-    web_content = web_loader.load()
-    return web_content
-
-
-# TODO move to pdf_handler.py ?
-def split_pdf(document_pages: List[Document]):
+def split_pdf(document_pages: list[Document]):
     """
     :param document_pages: document (as a list of pages) to split
     :return: a list of documents, one element for each split
@@ -54,8 +55,7 @@ def split_pdf(document_pages: List[Document]):
     return text_split
 
 
-# TODO move to separate file ?
-def split_document_paragraphs(document: Document) -> List[Document]:
+def split_document_paragraphs(document: Document) -> list[Document]:
     new_documents = []
     raw_text = document.page_content
     paragraphs = split_text_paragraphs(raw_text)
@@ -67,79 +67,7 @@ def split_document_paragraphs(document: Document) -> List[Document]:
     return new_documents
 
 
-# TODO move to separate file ?
 def split_text_paragraphs(text: str):
     # Split text into paragraphs using double line breaks
     paragraphs = text.split('\n\n')
     return paragraphs
-
-
-class VectorStoreController:
-    """
-    Controller for writing to and querying from vectorstore.
-    """
-
-    def __init__(self) -> None:
-        """Connects to the pinecone index (specified in .env)"""
-
-        # connect to vectorstore
-        index_name = os.getenv('PINECONE_INDEX_NAME')
-
-        # initialize pinecone
-        pinecone.init(
-            api_key=os.getenv("PINECONE_API_KEY"),
-            environment=os.getenv("PINECONE_API_ENV")
-        )
-
-        # load vectorstore and define embeddings to use later
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        self.docsearch = Pinecone.from_existing_index(
-            index_name=index_name, embedding=embeddings)
-
-    def add_documents_to_vectorstore(self, documents: List[Document]):
-        """
-        Creates embeddings from documents and stores them in the pinecone index.
-
-        :param documents: The documents array to embed and store in the index
-        :return: list of ids from adding the documents into the vectorstore.
-        """
-        return self.docsearch.add_documents(documents)
-
-    def add_text_to_vectorstore(self, text_split: List[str]):
-        """
-        Creates embeddings from a text and stores them in the pinecone index.
-
-        :param text_split: The text_split array to embed and store in the index
-        :return: list of ids from adding the texts into the vectorstore.
-        """
-        return self.docsearch.add_texts(text_split)
-
-    def query_vectorstore(self, query: str, k: int = 4, get_raw_text=False):
-        """
-        Performs similarity search in the pinecone index and returns the k most relevant documents.
-
-        :param query: The query to search for in the pinecone index
-        :param k: amount of documents to return
-        :param get_raw_text: whether raw texts of the documents should be returned
-        :return: k most relevant documents 
-        """
-        docs = self.docsearch.similarity_search(query=query, k=k)
-        print(docs)
-        if get_raw_text:
-            docs = [t.page_content for t in docs]
-
-        return docs
-
-
-def process_pdf(pdf_path: str, vector_store_controller: VectorStoreController):
-    """
-    load pdf and add to vector store
-    extract keywords from pdf and scrape the web
-    add scraped web content to vector store
-    """
-    pdf_docs = load_pdf(pdf_path)
-    vector_store_controller.add_documents_to_vectorstore(pdf_docs)
-    pdf_str = pdf_docs_to_str(pdf_docs)
-    search_query = get_search_terms(text=pdf_str)
-    web_content = load_web_content('chrome', search_query)
-    vector_store_controller.add_documents_to_vectorstore(web_content)

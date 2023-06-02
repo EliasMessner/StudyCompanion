@@ -1,7 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from pdf_handler import pdf_to_str
-from text_preprocessing import get_stopwords, clean
+from data_integration_pipeline import pdf_to_str
+from text_preprocessing import get_stopwords, clean_text
 
 
 def get_search_terms(text, uni=4, bi=4, stop_words=None) -> str:
@@ -30,7 +30,7 @@ def extract_keywords_from_pdf(path_to_pdf, stop_words=None, n=5):
 def extract_keywords_from_text(text, n=5, stop_words=None, ngram_range=(1, 1)):
     if stop_words is None:
         stop_words = get_stopwords("english", "german")
-    text_cleaned = clean(text, stop_words)
+    text_cleaned = clean_text(text, stop_words)
     kw_scores = get_keyword_scores(text_cleaned, ngram_range=ngram_range)
     return [kw[0] for kw in sorted(kw_scores.items(), key=lambda item: item[1], reverse=True)][:n]
 

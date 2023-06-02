@@ -1,8 +1,10 @@
 import os
+
+from langchain.document_loaders import SeleniumURLLoader
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import urllib
-from typing import Literal, List
+from typing import Literal
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -24,7 +26,7 @@ class Scraper:
     def destroy(self):
         self.browser.quit()
 
-    def get_medium_search_results(self, query: str) -> List[str]:
+    def get_medium_search_results(self, query: str) -> set[str]:
         params = {'q': query}
         param_str = urllib.parse.urlencode(params)
         url = f"https://medium.com/search/posts?{param_str}"
@@ -35,3 +37,14 @@ class Scraper:
         post_urls = {prt.get_attribute("href") for prt in post_read_times}
 
         return post_urls
+
+
+def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None):
+    scraper = Scraper(browser=browser)
+
+    medium_post_urls = scraper.get_medium_search_results(query=query)
+
+    web_loader = SeleniumURLLoader(
+        urls=medium_post_urls, browser=browser)
+    web_content = web_loader.load()
+    return web_content
