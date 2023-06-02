@@ -1,6 +1,6 @@
-from langchain.document_loaders import PyPDFLoader
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from pdf_handler import pdf_to_str
 from text_preprocessing import get_stopwords, clean
 
 
@@ -50,9 +50,3 @@ def get_keyword_scores(text, ngram_range=(1, 1)):
     for col in tfidf_matrix.nonzero()[1]:
         keyword_scores[feature_names[col]] = tfidf_matrix[0, col]
     return keyword_scores
-
-
-def pdf_to_str(pdf_path):
-    loader = PyPDFLoader(pdf_path)
-    documents = loader.load()
-    return ' '.join(doc.page_content for doc in documents)

@@ -8,12 +8,16 @@ from langchain.text_splitter import NLTKTextSplitter
 import pinecone
 import os
 from dotenv import load_dotenv
+
+from keyword_extraction_tfidf import get_search_terms
+from pdf_handler import pdf_docs_to_str
 from scraper import Scraper
 from typing import List, Literal
 
 load_dotenv()
 
 
+# TODO move to pdf_handler.py ?
 def load_pdf(pdf_path: str):
     """
     :param pdf_path: file path of pdf to load
@@ -26,6 +30,7 @@ def load_pdf(pdf_path: str):
     return document_pages
 
 
+# TODO move to scraper.py ?
 def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None):
     scraper = Scraper(browser=browser)
 
@@ -37,6 +42,7 @@ def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: s
     return web_content
 
 
+# TODO move to pdf_handler.py ?
 def split_pdf(document_pages: List[Document]):
     """
     :param document_pages: document (as a list of pages) to split
@@ -48,12 +54,7 @@ def split_pdf(document_pages: List[Document]):
     return text_split
 
 
-def split_text_paragraphs(text: str):
-    # Split text into paragraphs using double line breaks
-    paragraphs = text.split('\n\n')
-    return paragraphs
-
-
+# TODO move to separate file ?
 def split_document_paragraphs(document: Document) -> List[Document]:
     new_documents = []
     raw_text = document.page_content
@@ -64,6 +65,13 @@ def split_document_paragraphs(document: Document) -> List[Document]:
             Document(page_content=par, metadata=document.metadata))
 
     return new_documents
+
+
+# TODO move to separate file ?
+def split_text_paragraphs(text: str):
+    # Split text into paragraphs using double line breaks
+    paragraphs = text.split('\n\n')
+    return paragraphs
 
 
 class VectorStoreController:
@@ -121,3 +129,17 @@ class VectorStoreController:
             docs = [t.page_content for t in docs]
 
         return docs
+
+
+def process_pdf(pdf_path: str, vector_store_controller: VectorStoreController):
+    """
+    load pdf and add to vector store
+    extract keywords from pdf and scrape the web
+    add scraped web content to vector store
+    """
+    pdf_docs = load_pdf(pdf_path)
+    vector_store_controller.add_documents_to_vectorstore(pdf_docs)
+    pdf_str = pdf_docs_to_str(pdf_docs)
+    search_query = get_search_terms(text=pdf_str)
+    web_content = load_web_content('chrome', search_query)
+    vector_store_controller.add_documents_to_vectorstore(web_content)
