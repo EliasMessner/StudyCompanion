@@ -65,7 +65,7 @@ def split_document_paragraphs(document: Document) -> List[Document]:
 
 
 class DataIntegrationPipeline:
-    """Data Integration Pipeline. Loads pdf documents and stores their embeddings."""
+    """Data Integration Pipeline. Loads pdf documents, stores their embeddings, and scrapes the web for keywords."""
 
     def __init__(self) -> None:
         """Connects to the pinecone index (specified in .env)"""
