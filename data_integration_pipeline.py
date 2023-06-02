@@ -1,3 +1,5 @@
+"""Data Integration Pipeline. Loads pdf documents, stores their embeddings, and scrapes the web for keywords."""
+
 from langchain.document_loaders import PyPDFLoader, SeleniumURLLoader
 from langchain.vectorstores import Pinecone
 from langchain.embeddings import HuggingFaceEmbeddings
@@ -64,8 +66,10 @@ def split_document_paragraphs(document: Document) -> List[Document]:
     return new_documents
 
 
-class DataIntegrationPipeline:
-    """Data Integration Pipeline. Loads pdf documents, stores their embeddings, and scrapes the web for keywords."""
+class VectorStoreController:
+    """
+    Controller for writing to and querying from vectorstore.
+    """
 
     def __init__(self) -> None:
         """Connects to the pinecone index (specified in .env)"""
