@@ -12,7 +12,7 @@ from typing import List, Literal
 load_dotenv()
 
 
-class DataIntegrationPipeline():
+class DataIntegrationPipeline:
     """Data Integration Pipeline. Loads pdf documents and stores their embeddings."""
 
     def __init__(self) -> None:
@@ -92,7 +92,7 @@ class DataIntegrationPipeline():
         """
         docs = self.docsearch.similarity_search(query=query, k=k)
         print(docs)
-        if (get_raw_text):
+        if get_raw_text:
             docs = [t.page_content for t in docs]
 
         return docs
