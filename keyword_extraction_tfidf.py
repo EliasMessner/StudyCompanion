@@ -16,6 +16,7 @@ def get_search_terms(text, uni=4, bi=4, stop_words=None) -> str:
     """
     if stop_words is None:
         stop_words = get_stopwords("english", "german")
+    stop_words += ["et", "al"]
     top_bigrams = extract_keywords_from_text(text, n=bi, stop_words=stop_words, ngram_range=(2, 2))
     top_unigrams = [unigram for unigram in extract_keywords_from_text(text, n=uni, stop_words=stop_words,  ngram_range=(1, 1))
                     if not any(unigram in bigram for bigram in top_bigrams)]

@@ -15,13 +15,14 @@ def load_pdf(pdf_path: str):
     return document_pages
 
 
-def split_pdf(document_pages: list[Document]):
+def split_into_chunks(document_pages: list[Document], chunk_size=200):
     """
+    :param chunk_size: chunk size
     :param document_pages: document (as a list of pages) to split
     :return: a list of documents, one element for each split
     """
     # split texts to paragraphs
-    text_splitter = NLTKTextSplitter(chunk_size=200, chunk_overlap=0)
+    text_splitter = NLTKTextSplitter(chunk_size=chunk_size, chunk_overlap=0)
     text_split = text_splitter.split_documents(document_pages)
     return text_split
 
@@ -36,6 +37,13 @@ def split_document_paragraphs(document: Document) -> list[Document]:
             Document(page_content=par, metadata=document.metadata))
 
     return new_documents
+
+
+def split_documents_paragraphs(documents: list[Document]) -> list[Document]:
+    result = []
+    for doc in documents:
+        result += split_document_paragraphs(doc)
+    return result
 
 
 def split_text_paragraphs(text: str):
