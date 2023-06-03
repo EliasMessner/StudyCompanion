@@ -81,4 +81,5 @@ graph TD
   data_integration_pipeline -- uses --> keyword_extraction_tfidf;
   keyword_extraction_tfidf -- uses --> text_preprocessing;
   data_integration_pipeline -- uses --> vectorstore_controller[instance of vectorstoreController];
+  data_integration_pipeline -- uses --> pdf_and_text_utils;
 ```

@@ -11,7 +11,7 @@ from langchain.vectorstores import Pinecone
 load_dotenv()
 
 
-class VectorStoreController:
+class VectorstoreController:
     """
     Controller for writing to and querying from vectorstore.
     """
