@@ -1,7 +1,8 @@
 from langchain.document_loaders import PyPDFLoader
+from langchain.schema import Document
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from text_preprocessing import get_stopwords, clean
+from text_preprocessing import get_stopwords, clean_text
 
 
 def get_search_terms(text, uni=4, bi=4, stop_words=None) -> str:
@@ -15,6 +16,7 @@ def get_search_terms(text, uni=4, bi=4, stop_words=None) -> str:
     """
     if stop_words is None:
         stop_words = get_stopwords("english", "german")
+    stop_words += ["et", "al"]
     top_bigrams = extract_keywords_from_text(text, n=bi, stop_words=stop_words, ngram_range=(2, 2))
     top_unigrams = [unigram for unigram in extract_keywords_from_text(text, n=uni, stop_words=stop_words,  ngram_range=(1, 1))
                     if not any(unigram in bigram for bigram in top_bigrams)]
@@ -30,7 +32,7 @@ def extract_keywords_from_pdf(path_to_pdf, stop_words=None, n=5):
 def extract_keywords_from_text(text, n=5, stop_words=None, ngram_range=(1, 1)):
     if stop_words is None:
         stop_words = get_stopwords("english", "german")
-    text_cleaned = clean(text, stop_words)
+    text_cleaned = clean_text(text, stop_words)
     kw_scores = get_keyword_scores(text_cleaned, ngram_range=ngram_range)
     return [kw[0] for kw in sorted(kw_scores.items(), key=lambda item: item[1], reverse=True)][:n]
 
@@ -55,4 +57,8 @@ def get_keyword_scores(text, ngram_range=(1, 1)):
 def pdf_to_str(pdf_path):
     loader = PyPDFLoader(pdf_path)
     documents = loader.load()
-    return ' '.join(doc.page_content for doc in documents)
+    return pdf_docs_to_str(documents)
+
+
+def pdf_docs_to_str(pdf_docs: list[Document]):
+    return ' '.join(doc.page_content for doc in pdf_docs)

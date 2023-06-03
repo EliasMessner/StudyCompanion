@@ -1,9 +1,12 @@
 import os
+
+from langchain.document_loaders import SeleniumURLLoader
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 import urllib
-from typing import Literal, List
+from typing import Literal
 from dotenv import load_dotenv
+import logging
 load_dotenv()
 
 
@@ -24,7 +27,7 @@ class Scraper:
     def destroy(self):
         self.browser.quit()
 
-    def get_medium_search_results(self, query: str) -> List[str]:
+    def get_medium_search_results(self, query: str) -> list[str]:
         params = {'q': query}
         param_str = urllib.parse.urlencode(params)
         url = f"https://medium.com/search/posts?{param_str}"
@@ -34,4 +37,20 @@ class Scraper:
             By.XPATH, "//span[contains(text(), 'min read')]/ancestor::a[contains(@aria-label, 'Post Preview Reading Time')]")
         post_urls = {prt.get_attribute("href") for prt in post_read_times}
 
-        return post_urls
+        return list(post_urls)
+
+
+def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None):
+    # TODO exclude member-only pages
+    # TODO remove double line break (\n\n) or replace with space
+    scraper = Scraper(browser=browser)
+
+    medium_post_urls = scraper.get_medium_search_results(query=query)
+    for url in medium_post_urls:
+        logging.info(f"Scraping: {url}")
+        print(f"Scraping: {url}")  # TODO remove if logging works in jupyter
+
+    web_loader = SeleniumURLLoader(
+        urls=medium_post_urls, browser=browser)
+    web_content = web_loader.load()
+    return web_content

@@ -3,7 +3,13 @@ import string
 import nltk
 
 
-def clean(text, stop_words):
+def clean_text(text, stop_words):
+    """
+    preprocess given text and concatenate resulting tokens
+    :param text: text to clean
+    :param stop_words: stop words ignore
+    :return: cleaned text as one string
+    """
     return ' '.join(preprocess_text(text, stop_words))
 
 
