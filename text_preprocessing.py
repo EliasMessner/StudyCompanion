@@ -14,6 +14,8 @@ def clean_text(text, stop_words):
 
 
 def get_stopwords(*languages):
+    if 'stopwords' not in nltk.corpus:
+        nltk.download('stopwords')
     return [sw for lang in languages for sw in nltk.corpus.stopwords.words(lang)]
 
 
