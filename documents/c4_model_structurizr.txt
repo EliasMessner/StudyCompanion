@@ -1,0 +1,94 @@
+workspace {
+
+    model {
+        user = person "Student"
+        chatbot = softwareSystem "Chatbot" "Allows students to upload lecture slides and ask questions regarding those" {
+            chatbotFrontend = container "Web Application" "User interface for the chatbot" {
+                tags "webpage"
+                technology "JavaScript/Vue"
+                user -> this "Uploads slides and inputs questions"
+            }
+            chatbotCoreService = container "Core Service" "Service that handles lecture slide uploads and questions" {
+                technology "Python/FastAPI"
+                chatbotFrontend -> this "Forwards user questions"
+                chatbotCoreServiceChatController = component "Chat Controller" {
+                    chatbotFrontend -> this "Makes API calls to"
+                }
+                chatbotCoreServiceVectorstoreController = component "Vector Store Controller" {
+                    technology "Python/pinecone-client"
+                    chatbotCoreServiceChatController -> this "Searches vector embeddings using"
+                }
+            }
+            chatbotIngestService = container "Ingest Service" "Receives new lecture slides, scrapes additional content and handles vector ingestion" {
+                technology "Python/FastAPI"
+                chatbotFrontend -> this "Uploads files"
+                chatbotIngestServicePipelineController = component "Pipeline Controller" {
+                    chatbotFrontend -> this "Makes API calls to"
+                }
+                chatbotIngestServiceScraper = component "Scraper" {
+                    technology "Python/Selenium"
+                    chatbotIngestServicePipelineController -> this "Scrapes additional content using"
+                }
+                chatbotIngestServiceVectorstoreController = component "Vector Store Controller" {
+                    technology "Python/pinecone-client"
+                    chatbotIngestServicePipelineController -> this "Stores lecture slides using"
+                    chatbotIngestServiceScraper -> this "Creates and stores vector embeddings of webposts using"
+                }
+                chatbotIngestServiceEmbeddingModel = component "Embedding Model" {
+                    technology "Python/Pytorch/SentenceTransformer"
+                    chatbotIngestServiceVectorstoreController -> this "Creates vector embeddings using"
+                }
+
+            }
+        }
+        LLMService = softwareSystem "LLM Service" "Receives student questions and context to create responses" {
+            tags "grey"
+            chatbotCoreServiceChatController -> this "Forwards questions and context"
+        }
+        vectorStore = softwareSystem "Vector Store" "Stores and searches vectors created from text" {
+            tags "grey" "database"
+            chatbotIngestServiceVectorstoreController -> this "Forward embeddings created from lecture slides and additional content"
+            chatbotCoreServiceVectorstoreController -> "this" "Search vector database based on student question to retrieve context"
+        }
+        medium = softwareSystem "Medium Blog" "Blog website with different technology posts" {
+            tags "grey" "webpage"
+            chatbotIngestServiceScraper -> this "Retrieves relevant posts, guides and industry best practices by lecture slide topic"
+        }
+    }
+
+    views {
+        systemContext chatbot {
+            include *
+            autolayout tb
+            
+        }
+
+        container chatbot {
+            include *
+            autolayout lr
+        }
+        
+        component chatbotIngestService {
+            include *
+            autolayout tb
+        }
+
+        component chatbotCoreService {
+            include *
+            autolayout tb
+        }
+
+        theme default
+        styles {
+            element grey {
+                background grey
+            }
+            element database {
+                shape Cylinder
+            }
+            element webpage {
+                shape WebBrowser
+            }
+        }
+    }
+}
