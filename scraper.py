@@ -53,4 +53,11 @@ def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: s
     web_loader = SeleniumURLLoader(
         urls=medium_post_urls, browser=browser)
     web_content = web_loader.load()
-    return web_content
+
+    # replace line breaks with whitespaces
+    web_content_no_linebreaks = []
+    for doc in web_content:
+        doc.page_content = doc.page_content.replace("\n\n", " ")
+        web_content_no_linebreaks.append(doc)
+
+    return web_content_no_linebreaks
