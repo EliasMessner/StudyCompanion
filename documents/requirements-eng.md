@@ -144,16 +144,22 @@ By combining insights into the usage scenarios and the superfical description of
 
 | **Stakeholder** | **Specification**                                                                    | **Type**       |
 |-----------------|--------------------------------------------------------------------------------------|----------------|
-| Lecturers  |  | Non-Functional |
+| Lecturers  | Lecturers and creators of lecture slides have copyright on their work, which needs to be respected by the students which upload the slides and also by the system itself. Uploaders should guarantee that they have permission to use the respective documents and the system should offer functionality for users to report answers, which they think contains copyrighted information. | Non-Functional |
 
 ## Maintainabiliy of system (e.g. modularized, exchangeable, parameterizable)
-Non-Functional
+| **Stakeholder** | **Specification**                                                                    | **Type**       |
+|-----------------|--------------------------------------------------------------------------------------|----------------|
+| Development Team  | The system should fulfill several requirements regarding maintainability to allow for easy enhancements and also reaction to changes. The different system components, such as creating embeddings, uploading embeddings to vector store and searching vector store should be implemented in a modular manner. Where possible and useful, parameters should be implemented to control behaviour of the system. Assumptions for parameters should not be hard-coded but rather shown as possible parameter configurations. This also applies to used models. | Non-Functional |
 
 ## Collaboration in development process / usage of code repository
-Constraint
+| **Stakeholder** | **Specification**                                                                    | **Type**       |
+|-----------------|--------------------------------------------------------------------------------------|----------------|
+| Development Team  | To support collaborative development and access to codebase a version control system should be used by every project participant. In particular, the Uni Leipzig Computer Science Department GitLab should be used, as every participant is already registered and a project is also already created there. The branch-merge approach should be used when working with the code repository. The main branch is called "main". | Constraint |
 
 ## Vector store should be used for efficient selection of context
-Functional
+| **Stakeholder** | **Specification**                                                                    | **Type**       |
+|-----------------|--------------------------------------------------------------------------------------|----------------|
+| Development Team  | The recommendation of the Chair of Software Systems regarding database should be followed by using a vector database for information ingestion (slides, posts) and also information retrieval. The context can only be provided efficiently to the LLM (see response time) if it already exists in a semantically ordered manner, that can be queried rapdily. Vector stores offer this through leveraging vector embedding models and efficient vector storage. In particular, the Pinecone vector database service should be used for the implementation of this system. | Functional |
 
 # AI-specific System Specification
 
