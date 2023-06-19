@@ -46,6 +46,11 @@ def remove_member_only_posts(web_content_list):
         # check first 100 characters
         if "Member-only story" not in web_content.page_content[0:100]:
             result_list.append(web_content)
+        else:
+            logging.info(
+                f"Removing (Member-only): {web_content.metadata['source']}")
+            # TODO remove if logging works in jupyter
+            print(f"Removing (Member-only): {web_content.metadata['source']}")
     return result_list
 
 
