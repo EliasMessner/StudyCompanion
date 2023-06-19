@@ -55,10 +55,16 @@ def remove_member_only_posts(web_content_list):
 
 
 def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None, user_supplied_topic: str = None):
-    # TODO exclude member-only pages
     scraper = Scraper(browser=browser)
 
     medium_post_urls = scraper.get_medium_search_results(query=query)
+
+    # also scrape webcontent of user supplied topic
+    if user_supplied_topic:
+        medium_user_defined_urls = scraper.get_medium_search_results(
+            query=user_supplied_topic)
+        medium_post_urls += medium_user_defined_urls
+
     for url in medium_post_urls:
         logging.info(f"Scraping: {url}")
         print(f"Scraping: {url}")  # TODO remove if logging works in jupyter
