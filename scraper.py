@@ -40,9 +40,17 @@ class Scraper:
         return list(post_urls)
 
 
-def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None):
+def remove_member_only_posts(web_content_list):
+    result_list = []
+    for web_content in web_content_list:
+        # check first 100 characters
+        if "Member-only story" not in web_content.page_content[0:100]:
+            result_list.append(web_content)
+    return result_list
+
+
+def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None, user_supplied_topic: str = None):
     # TODO exclude member-only pages
-    # TODO remove double line break (\n\n) or replace with space
     scraper = Scraper(browser=browser)
 
     medium_post_urls = scraper.get_medium_search_results(query=query)
@@ -53,6 +61,9 @@ def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: s
     web_loader = SeleniumURLLoader(
         urls=medium_post_urls, browser=browser)
     web_content = web_loader.load()
+
+    # remove member only post
+    web_content = remove_member_only_posts(web_content)
 
     # replace line breaks with whitespaces
     web_content_no_linebreaks = []
