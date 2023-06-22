@@ -6,11 +6,11 @@ Umstieg auf ein lokales Embedding Model auf Basis von sBert
 ## Auslastung des Services, wenn alle Komponenten darauf liegen
 Aufteilung der Services nach Rechenintensität in Core Service und Ingest Service
 
-## Synchonisation der beiden Services bezüglich Ingest-Status
+## Synchonisation der beiden Services bezüglich Ingest-Status und Speicherung von Slides und Posts
 Einbringung einer Datenbank, welche neben gescrapten Websites und hochgeladenen Foliensätzen auch den Status von einzelnen Upload Jobs trackt
 
 ## Ermittlung des Themas aus hochgeladenen Folien als Basis für Scraping
-Es wurden zwei Methoden erprobt (statistischer Ansatz und Language Model-basiert). Dabei ist aufgefallen, dass das Topic Modelling des Language Model zu unzuverlässig ist, da domänenspezifisches Vokabular und themenspezifische Begriffe automatisch als Thema ermittelt werden. Mit dem statistischen Ansatz wurden gute Ergebnisse erzielt mit bestimmten Anpassungen. Allerdings wurde final festgelegt, dass die Nutzer noch ein Thema der Vorlesungsfolien beim Hochladen mitliefern sollen, um die Passgenauigkeit der gescrapeten Beiträge zu verbessern.
+Es wurden zwei Methoden erprobt (probabilistischer Ansatz - Tfidf und Language Model-basiert - KeyBERT). Dabei ist aufgefallen, dass das Topic Modelling des Language Model zu unzuverlässig ist, da domänenspezifisches Vokabular automatisch als Keywords ermittelt werden. Mit dem statistischen Ansatz wurden gute Ergebnisse erzielt mit bestimmten Anpassungen. Allerdings wurde final festgelegt, dass die Nutzer noch ein Thema der Vorlesungsfolien beim Hochladen mitliefern sollen, um die Passgenauigkeit der gescrapeten Beiträge zu verbessern.
 
 ## Länge der Elemente für Embedding und Einfügung in Vektor DB
 Es wurde zunächst ein Satz als Basis für Embeddings gewählt. Dies hat allerdings insbesondere für Blog-Beiträge zu sehr kurzen Embeddings geführt, welche nicht in der Lage sind einen Wert zu liefern. Unter Umständen waren mehrere Sätze notwendig um ein semantisch sinnvolles Element zu erhalten, welches dann als Kontext geliefert werden kann. Es wurde sich auf eine Länge von 1000 Zeichen geeinigt, wobei NLTK eine sinnvolle Teilung gemäß der Sprache sicherstellt.
