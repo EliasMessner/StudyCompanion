@@ -12,6 +12,25 @@ git pull <preferred remote name> main
 ```
 
 ### Set up local python environment
+#### Using Conda
+
+Create Conda environment with pip installed
+```
+conda create --n chatbot python=3.10 pip
+```
+
+Install requirements
+```
+pip install -r requirements.txt
+```
+
+Freeze only top-level requirements
+```
+pip-chill > requirements.txt
+```
+
+
+#### Using venv
 
 Add python virtualenv inside the project folder (name = env)
 ```
@@ -67,12 +86,6 @@ pip freeze > requirements.txt
 ```
 
 The requirements.txt file can then be shared regularly via git and installed by all the others. This is also why it is important to check for new dependencies in the file, when pulling code.
-
-For Conda users getting odd path references in requirements.txt, use:
-
-```
-pip list --format=freeze > requirements.txt
-```
 
 ## File Dependency Graph
 
