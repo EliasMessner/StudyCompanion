@@ -11,8 +11,7 @@ git remote add <preferred remote name> https://git.informatik.uni-leipzig.de/SWS
 git pull <preferred remote name> main
 ```
 
-### Set up local python environment
-#### Using Conda
+### Set up local python environment using Conda
 
 Create Conda environment with pip installed
 ```
@@ -29,28 +28,11 @@ Install requirements
 pip install -r requirements.txt
 ```
 
-Freeze only top-level requirements
+Freeze requirements. We use pip-chill so that only top-level requirements are frozen, this way the requirements stay os-independent.
 ```
 pip-chill > requirements.txt
 ```
 
-
-#### Using venv
-
-Add python virtualenv inside the project folder (name = env)
-```
-python -m venv env
-```
-
-Activate virtualenv
-```
-source env/bin/activate
-```
-
-Install depenendencies from requirements.txt inside virtualenv
-```
-pip install -r requirements.txt
-```
 
 ### Set up environment variable file for credentials
 
@@ -68,17 +50,17 @@ PINECONE_API_ENV=""
 CHROME_BINARY_LOCATION ="C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
 ```
 
-### Development workflow for virtualenv & dependency installation
+### Development workflow for conda env & dependency installation
 
-Before developing start the virtualenv if not already active
+Before developing activate the conda env
 ```
-source env/bin/activate
+conda activate chatbot
 ```
 
 If you want to add new dependencies/requirements assure yourself that
 * you got the latest requirements.txt file within the branch
-* your virtualenv is active
-* your virtualenv has all the newest dependencies installed
+* your conda env is active
+* your conda env has all the newest dependencies installed
 
 If this is true install the dependency regularly
 ```
@@ -87,7 +69,7 @@ pip install <dependency name>
 
 After the installation is finished write a new requirements.txt file
 ```
-pip freeze > requirements.txt
+pip-chill > requirements.txt
 ```
 
 The requirements.txt file can then be shared regularly via git and installed by all the others. This is also why it is important to check for new dependencies in the file, when pulling code.
