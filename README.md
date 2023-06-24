@@ -19,6 +19,11 @@ Create Conda environment with pip installed
 conda create -n chatbot python=3.10 pip
 ```
 
+Activate the environment
+```
+conda activate chatbot
+```
+
 Install requirements
 ```
 pip install -r requirements.txt
