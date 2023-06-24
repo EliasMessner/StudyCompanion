@@ -16,7 +16,7 @@ git pull <preferred remote name> main
 
 Create Conda environment with pip installed
 ```
-conda create --n chatbot python=3.10 pip
+conda create -n chatbot python=3.10 pip
 ```
 
 Install requirements
