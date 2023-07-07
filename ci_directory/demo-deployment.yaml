@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: demo-deployment
+  namespace: demo-moritz
+  labels:
+    app: webapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        volumeMounts:
+          - name: moritz-volume
+            mountPath: /usr/shared/nginx/html
+        ports:
+        - containerPort: 80
+      volumes:
+      - name: moritz-volume
+        persistentVolumeClaim:
+          claimName: moritz-pvc
+              

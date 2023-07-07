@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: demo-moritz
+  name: demo-ingress-moritz
+spec:
+  rules:
+  - host: group7.se4ai.sws.informatik.uni-leipzig.de
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: demo-svc-moritz
+            port:
+              number: 5000
