@@ -16,10 +16,6 @@
 # This specific template is located at:
 # https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Getting-Started.gitlab-ci.yml
 
-variables:
-    API_ACCESS: "token-j4hd9"
-    API_SECRET: "pt4j6n7hnzpfnfdfbt7kqkr79s7hqrfvf2c9mjjbnn5xhq5m9jkf4m"
-    API_BEARER: "token-j4hd9:pt4j6n7hnzpfnfdfbt7kqkr79s7hqrfvf2c9mjjbnn5xhq5m9jkf4m"
 
 stages:          # List of stages for jobs, and their order of execution
   - build
