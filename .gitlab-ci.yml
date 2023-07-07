@@ -30,7 +30,8 @@ deploy:
   before_script:
     - kubectl config set-cluster voyager --kubeconfig="ci_directory/config" --server=https://rancher.sws.informatik.uni-leipzig.de/k8s/clusters/c-m-brg24gnx
     - kubectl config set-credentials voyager --token="${BEARER_KEY}"
-    - kubectl config set-context voyager --namespace="demo-moritz" --cluster=voyager --user=voyager --kubeconfig="ci_directory/config"
+    - kubectl config set-context voyager --namespace="demo-moritz"
+    - kubectl config set-context voyager --cluster=voyager --user=voyager
     - kubectl config use-context voyager
   script:
     - kubectl apply -f ci_directory/demo-pvc.yaml -f ci_directory/demo-service.yaml -f ci_directory/demo-deployment.yaml -f ci_directory/demo-ingress.yaml
