@@ -29,7 +29,7 @@ deploy:
     entrypoint: ['']
   before_script:
     - kubectl config set-cluster voyager --kubeconfig="ci_directory/config" --server=https://1.2.3.4
-    - kubectl config set-credentials --username="${ACCESS_KEY}" --password="${SECRET_KEY}"
+    - kubectl config set-credentials pipeline --token="${BEARER_KEY}"
     - kubectl config set-context "voyager" --cluster=voyager --user="${ACCESS_KEY}" --namespace="demo-moritz"
     - kubectl config use-context "voyager"
   script:
