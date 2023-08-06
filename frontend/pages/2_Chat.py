@@ -1,6 +1,8 @@
 # https://blog.streamlit.io/how-to-build-an-llm-powered-chatbot-with-streamlit/#4-session-state
 
 import streamlit as st
+import time
+from streamlit_chat import message
 
 st.set_page_config(page_title="Chat")
 
@@ -20,12 +22,18 @@ if prompt := st.chat_input():
     with st.chat_message("user"):
         st.write(prompt)
 
-# TODO: generate bot response
+
+def sample_response() -> str:
+    # simulate delay
+    time.sleep(5)
+    return "Example Response from Bot."
+
+
 # Generate a new response if last message is not from assistant
-# if st.session_state.messages[-1]["role"] != "assistant":
-    # with st.chat_message("assistant"):
-       # with st.spinner("Thinking..."):
-        #response = generate_response(prompt, hf_email, hf_pass)
-        # st.write(response)
-    #message = {"role": "assistant", "content": response}
-    # st.session_state.messages.append(message)
+if st.session_state.messages[-1]["role"] != "assistant":
+    with st.chat_message("assistant"):
+        with st.spinner(""):
+            response = sample_response()
+            st.write(response)
+    message = {"role": "assistant", "content": response}
+    st.session_state.messages.append(message)
