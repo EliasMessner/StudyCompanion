@@ -74,6 +74,13 @@ pip-chill > requirements.txt
 
 The requirements.txt file can then be shared regularly via git and installed by all the others. This is also why it is important to check for new dependencies in the file, when pulling code.
 
+
+### Run Frontend with Streamlit
+```
+streamlit run ./frontend/Home.py
+```
+
+
 ## File Dependency Graph
 
 ```mermaid
