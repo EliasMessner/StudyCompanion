@@ -26,7 +26,3 @@ class PipelineController:
         splitted_documents = split_documents(filtered_documents)
         cleaned_documents = clean(splitted_documents)
         self.vectorstore_controller.add_documents_to_vectorstore(cleaned_documents)
-
-
-pipeline_controller = PipelineController()
-pipeline_controller.ingest_pdf("spielwiese/test_pdf/3_RequirementsEngineering.pdf")

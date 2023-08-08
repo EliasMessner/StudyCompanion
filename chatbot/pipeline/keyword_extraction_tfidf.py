@@ -5,7 +5,7 @@ from typing import List
 import nltk
 import string
 
-from src.document_preprocessing import clean
+from chatbot.pipeline.document_preprocessing import clean
 
 def documents_to_str(documents: list[Document]):
     return ' '.join(document.page_content for document in documents)
