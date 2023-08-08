@@ -1,5 +1,3 @@
-from vectorstore_controller import VectorstoreController
-from langchain.chains.retrieval_qa.base import VectorDBQA
 from langchain.embeddings import HuggingFaceEmbeddings
 from langchain.vectorstores import Pinecone
 from langchain.chains import (LLMChain, RetrievalQA)

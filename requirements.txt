@@ -3,7 +3,6 @@ cchardet==2.1.7
 importlib-metadata==6.6.0
 jupyter==1.0.0
 jupyterlab==3.5.3
-keybert==0.7.0
 langchain==0.0.171
 markdown-it-py==2.2.0
 pinecone-client==2.2.1

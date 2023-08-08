@@ -5,7 +5,7 @@ from typing import List
 import nltk
 import string
 
-from document_preprocessing import clean
+from src.document_preprocessing import clean
 
 def documents_to_str(documents: list[Document]):
     return ' '.join(document.page_content for document in documents)
