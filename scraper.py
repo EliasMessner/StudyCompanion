@@ -1,85 +1,204 @@
 import os
-
-from langchain.document_loaders import SeleniumURLLoader
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-import urllib
-from typing import Literal
-from dotenv import load_dotenv
+from abc import ABC, abstractmethod
+from typing import Literal, Any, List
 import logging
+import requests
+from selenium import webdriver
+from bs4 import BeautifulSoup, ResultSet, PageElement
+from langchain.schema import Document
+from langchain.document_loaders.unstructured import UnstructuredBaseLoader
+
+from dotenv import load_dotenv
 load_dotenv()
 
 
+def decompose_many(elements: ResultSet[PageElement]) -> None:
+    """
+    Decomposes all elements in ResultSet of PageElement objects produced by BeautifulSoup query
+
+    :param elements: The ResultSet containing one or many PageElement objects
+    :return: None
+    """
+    for e in elements:
+        e.decompose()
+
+class UnstructuredHtmlStringLoader(UnstructuredBaseLoader):
+    """
+    Custom loader for HTML strings using UnstructuredBaseLoader
+    """
+    def __init__(self, content: str, source: str = None, mode: str = "single", **unstructured_kwargs: Any):
+        self.content = content
+        self.source = source
+        super().__init__(mode=mode, **unstructured_kwargs)
+
+    def _get_elements(self) -> list:
+        from unstructured.partition.html import partition_html
+
+        return partition_html(text=self.content, **self.unstructured_kwargs)
+
+    def _get_metadata(self) -> dict:
+        return {"source": self.source} if self.source else {}
+
+class PageFilter(ABC):
+    """
+    Abstract PageFilter class
+    PageFilters can be configured for Scraper class and will be used to filter found pages before preprocessing and returning the result
+    """
+    def __init__(self, sites: List[str]):
+        self.sites = sites
+
+    """
+    Abstract filter method that must be implemented in PageFilter classes and defines the filtering outcome
+
+    :param html: The HTML string to check for filter criteria
+    :return: The bool signalling fulfillment of filter criteria
+    """
+    @abstractmethod
+    def filter(self, html: str) -> bool:
+        raise NotImplementedError
+
+class MediumMemberOnlyPageFilter(PageFilter):
+    """
+    PageFilter for Medium that filters member-only pages
+    """
+    def __init__(self):
+        sites = ["medium.com"]
+        super().__init__(sites)
+    
+    def filter(self, html: str) -> bool:
+        soup = BeautifulSoup(html, "html.parser")
+        if soup.find("p", string="Member-only story"):
+            return True
+
+        return False
+    
+class HtmlPreprocessor(ABC):
+    """
+    Abstract HTML Preprocessor class
+    HTML Preprocessors can be configured for Scraper class and will be used to preprocess HTML of pages after filtering and before returning the result
+    """
+    def __init__(self, sites: List[str]):
+        self.sites = sites
+
+    """
+    Abstract preprocess method that must be implemented in Preprocessor classes and defines the preprocessing outcome
+
+    :param html: The HTML string to preprocess
+    :return: The preprocessed and potentially reduced HTML string
+    """
+    @abstractmethod
+    def preprocess(self, html: str) -> str:
+        raise NotImplementedError
+    
+class MediumFooterRemovalHtmlPreprocessor(HtmlPreprocessor):
+    """
+    Preprocessor for Medium that removes the footer and post recommendations
+    """
+    def __init__(self):
+        sites = ["medium.com"]
+        super().__init__(sites)
+
+    def preprocess(self, html: str) -> str:
+        soup = BeautifulSoup(html, "html.parser")
+
+        footer = soup.find("footer")
+        footer_next_siblings = footer.find_next_siblings()
+
+        decompose_many([footer, *footer_next_siblings])
+
+        return str(soup)
+
 class Scraper:
-    def __init__(self, browser: Literal["firefox", "chrome"] = "firefox"):
-        if browser == "firefox":
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+
+        self.browser = os.environ.get("BROWSER", "chrome")
+        self.logger.info(f"Using browser {self.browser}")
+        self.browser_binary_location = os.environ.get("BROWSER_BINARY_LOCATION", None)
+        self.logger.info(f"Using browser binary location {self.browser_binary_location if self.browser_binary_location else 'default'}")
+
+        self.driver = None
+        if self.browser == "firefox":
             from selenium.webdriver.firefox.options import Options
             options = Options()
+            options.binary_location = self.browser_binary_location
             options.headless = True
-            self.browser = webdriver.Firefox(options=options)
-        elif browser == "chrome":
+            self.driver = webdriver.Firefox(options=options)
+        elif self.browser == "chrome":
             from selenium.webdriver.chrome.options import Options
             options = Options()
-            options.binary_location = os.getenv("CHROME_BINARY_LOCATION")
+            options.binary_location = self.browser_binary_location
             options.headless = True
-            self.browser = webdriver.Chrome(options=options)
+            self.driver = webdriver.Chrome(options=options)
 
-    def destroy(self):
-        self.browser.quit()
+        self.session = requests.Session()
+        self.duckduckgo_search_url = "https://lite.duckduckgo.com/lite/"
+        self.sites = ["medium.com"]
+        self.page_filters = [MediumMemberOnlyPageFilter]
+        self.html_preprocessors = [MediumFooterRemovalHtmlPreprocessor]
 
-    def get_medium_search_results(self, query: str) -> list[str]:
-        params = {'q': query}
-        param_str = urllib.parse.urlencode(params)
-        url = f"https://medium.com/search/posts?{param_str}"
+    def filter_page(self, site: str, html: str) -> bool:
+        for Filter in self.page_filters:
+            filter = Filter()
+            if site in filter.sites:
+                if filter.filter(html):
+                    return True
+        
+        return False
+    
+    def preprocess(self, site: str, input: str) -> str:
+        output = ""
+        for Preprocessor in self.html_preprocessors:
+            preprocessor = Preprocessor()
+            if site in preprocessor.sites:
+                output = preprocessor.preprocess(input)
 
-        self.browser.get(url)
-        post_read_times = self.browser.find_elements(
-            By.XPATH, "//span[contains(text(), 'min read')]/ancestor::a[contains(@aria-label, 'Post Preview Reading Time')]")
-        post_urls = {prt.get_attribute("href") for prt in post_read_times}
+        return output
 
-        return list(post_urls)
+    def search_pages(self, site: str, query: str) -> list:
+        query_string = f"site:{site} {query}"
+        data = {"q": query_string}
+        req = requests.Request(method="POST", url=self.duckduckgo_search_url, data=data)
+        req = req.prepare()
 
+        resp = self.session.send(req)
 
-def remove_member_only_posts(web_content_list):
-    result_list = []
-    for web_content in web_content_list:
-        # check first 100 characters
-        if "Member-only story" not in web_content.page_content[0:100]:
-            result_list.append(web_content)
-        else:
-            logging.info(
-                f"Removing (Member-only): {web_content.metadata['source']}")
-            # TODO remove if logging works in jupyter
-            print(f"Removing (Member-only): {web_content.metadata['source']}")
-    return result_list
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        results = soup.css.select("a.result-link")
+        pages = [{"title": result.string, "url": result.attrs['href']} for result in results]
+        self.logger.info(f"Found {len(pages)} pages for site {site}\n{os.linesep.join([page['url'] for page in pages])}")
 
+        try:
+            return pages
+        except IndexError:
+            pass
 
-def load_web_content(browser: Literal["firefox", "chrome"] = "firefox", query: str = None, user_supplied_topic: str = None):
-    scraper = Scraper(browser=browser)
+    def scrape(self, query: str, n_per_site: int) -> List[Document]:
+        documents = []
+        
+        for site in self.sites:
+            pages = self.search_pages(site, query)
+            page_urls = [page['url'] for page in pages]
 
-    medium_post_urls = scraper.get_medium_search_results(query=query)
+            scraped_count = 0
+            for url in page_urls:
+                if scraped_count >= n_per_site: break
 
-    # also scrape webcontent of user supplied topic
-    if user_supplied_topic:
-        medium_user_defined_urls = scraper.get_medium_search_results(
-            query=user_supplied_topic)
-        medium_post_urls += medium_user_defined_urls
+                self.driver.get(url)
+                html = self.driver.page_source
 
-    for url in medium_post_urls:
-        logging.info(f"Scraping: {url}")
-        print(f"Scraping: {url}")  # TODO remove if logging works in jupyter
+                if self.filter_page(site, html):
+                    self.logger.info(f"Filtered page {url} for site {site}")
+                    continue
+                
+                html_len_before = len(html)
+                html = self.preprocess(site, html)
+                self.logger.info(f"Html Preprocessing reduced page {url} for site {site} from {html_len_before} to {len(html)} characters")
 
-    web_loader = SeleniumURLLoader(
-        urls=medium_post_urls, browser=browser)
-    web_content = web_loader.load()
+                loader = UnstructuredHtmlStringLoader(content=html, source=url)
+                document = loader.load()[0]
+                documents.append(document)
 
-    # remove member only post
-    web_content = remove_member_only_posts(web_content)
+                scraped_count = scraped_count + 1
 
-    # replace line breaks with whitespaces
-    web_content_no_linebreaks = []
-    for doc in web_content:
-        doc.page_content = doc.page_content.replace("\n\n", " ")
-        web_content_no_linebreaks.append(doc)
-
-    return web_content_no_linebreaks
+        return documents
