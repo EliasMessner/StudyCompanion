@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: test-matkowitz
+  name: demo-ingress
+  annotations:
+    cert.manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+  - host: group7.se4ai.sws.informatik.uni-leipzig.de
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: demo-svc
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - group7.se4ai.sws.informatik.uni-leipzig.de
+    secretName: group7.se4ai.sws.informatik.uni-leipzig.de-tls

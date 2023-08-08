@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: test-matkowitz
+  name: demo-deployment
+  labels:
+    app: demo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: demo-app
+  template:
+    metadata:
+      labels:
+        app: demo-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: demo-app-volume
+          mountPath: /usr/shared/nginx/html
+      volumes:
+      - name: demo-app-volume
+        persistentVolumeClaim:
+          claimName: demo-pvc

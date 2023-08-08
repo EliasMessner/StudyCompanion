@@ -1,8 +1,8 @@
-from pdf_and_text_utils import load_pdf
-from keyword_extraction_tfidf import get_keywords
-from scraper import Scraper
-from vectorstore_controller import VectorstoreController
-from document_preprocessing import clean, remove_short_paragraphs_from_documents, remove_short_documents, split_documents
+from pipeline.pdf_and_text_utils import load_pdf
+from pipeline.keyword_extraction_tfidf import get_keywords
+from pipeline.scraper import Scraper
+from pipeline.vectorstore_controller import VectorstoreController
+from pipeline.document_preprocessing import clean, remove_short_paragraphs_from_documents, remove_short_documents, split_documents
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -26,7 +26,3 @@ class PipelineController:
         splitted_documents = split_documents(filtered_documents)
         cleaned_documents = clean(splitted_documents)
         self.vectorstore_controller.add_documents_to_vectorstore(cleaned_documents)
-
-
-pipeline_controller = PipelineController()
-pipeline_controller.ingest_pdf("spielwiese/test_pdf/3_RequirementsEngineering.pdf")
