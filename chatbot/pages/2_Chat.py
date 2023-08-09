@@ -1,5 +1,5 @@
 # https://blog.streamlit.io/how-to-build-an-llm-powered-chatbot-with-streamlit/#4-session-state
-
+import time
 import streamlit as st
 from streamlit_chat import message
 from chat.chat_controller import ChatController
@@ -46,11 +46,24 @@ if prompt := st.chat_input():
 # Generate a new response if last message is not from assistant
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        full_response = ""
+
         with st.spinner(""):
             chat_controller = get_chat_controller()
-            response = chat_controller.on_new_user_message(
+            assistant_response = chat_controller.on_new_user_message(
                 st.session_state.messages)
-            st.write(response['content'])
-            with st.expander("Sources"):
-                st.write("\n\n".join(response['sources']))
-    st.session_state.messages.append(response)
+
+        # Simulate stream of response content with milliseconds delay
+        for chunk in assistant_response['content'].split():
+            full_response += chunk + " "
+            time.sleep(0.05)
+            # Add a blinking cursor to simulate typing
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
+        # st.write(assistant_response['content'])
+        with st.expander("Sources"):
+            st.write("\n\n".join(assistant_response['sources']))
+    # Add assistant response to chat history
+    st.session_state.messages.append(
+        {"role": "assistant", "content": full_response})
