@@ -8,6 +8,23 @@ from langchain.schema import Document
 
 LANGUAGES = ["english", "german"]
 
+def documents_to_linebreaked_strings(documents: List[Document]):
+    return "\n\n".join(document.page_content for document in documents)
+
+def documents_to_unique_metadata(documents: List[Document]):
+    metadata = [document.metadata for document in documents]
+    unique_metadata = []
+    for m in metadata:
+        metadata_string = ""
+        if "page" in m.keys():
+            metadata_string = f"{m['source']} (Page {int(m['page'])})"
+        else:
+            metadata_string = m['source']
+        unique_metadata.append(metadata_string)
+
+    return list(set(unique_metadata))
+
+
 def get_stopwords(languages=LANGUAGES):
     nltk.download('stopwords')
     return {sw for lang in languages for sw in nltk.corpus.stopwords.words(lang)}

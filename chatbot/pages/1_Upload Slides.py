@@ -1,6 +1,7 @@
 import streamlit as st
-from chatbot.pipeline.pipeline_controller import PipelineController
+from pipeline.pipeline_controller import PipelineController
 import tempfile
+import os
 
 @st.cache_resource(show_spinner=False)
 def get_pipeline_controller():
@@ -12,11 +13,14 @@ get_pipeline_controller()
 st.set_page_config(page_title="Upload Slides")
 uploaded_files = st.file_uploader(label="Upload multiple files", type="PDF", accept_multiple_files=True)
 for uploaded_file in uploaded_files:
+    file_name = uploaded_file.name
+    print(file_name)
     bytes_data = uploaded_file.read()
-    with tempfile.NamedTemporaryFile() as tmpfile:
-        tmpfile.write(bytes_data)
-        path = tmpfile.name
-        pipeline_controller = get_pipeline_controller()
-        pipeline_controller.ingest_pdf(path)
 
-    
+    with tempfile.TemporaryDirectory() as temp_dir:
+        path = os.path.join(temp_dir, file_name)
+        file = open(path, 'w+b')
+        file.write(bytes_data)
+        pipeline_controller = get_pipeline_controller()
+        with st.spinner(text="Ingesting file"):
+            pipeline_controller.ingest_pdf(path)

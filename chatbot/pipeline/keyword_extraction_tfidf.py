@@ -5,7 +5,7 @@ from typing import List
 import nltk
 import string
 
-from chatbot.pipeline.document_preprocessing import clean
+from pipeline.document_preprocessing import clean
 
 def documents_to_str(documents: list[Document]):
     return ' '.join(document.page_content for document in documents)
@@ -19,7 +19,6 @@ def get_keywords(documents: List[Document], uni=4, bi=4) -> str:
     :param stop_words: stopwords to use
     :return: keywords as string (separated by space)
     """
-    cleaned_documents = clean(documents)
 
     text = documents_to_str(documents)
 
