@@ -48,6 +48,9 @@ PINECONE_INDEX_NAME=""
 PINECONE_API_KEY=""
 PINECONE_API_ENV=""
 CHROME_BINARY_LOCATION ="C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"
+OPENAI_API_KEY=""
+TRUBRICS_EMAIL=""
+TRUBRICS_PASSWORD=""
 ```
 
 ### Development workflow for conda env & dependency installation
@@ -77,7 +80,7 @@ The requirements.txt file can then be shared regularly via git and installed by 
 
 ### Run Frontend with Streamlit
 ```
-streamlit run ./frontend/Home.py
+streamlit run ./chatbot/Home.py
 ```
 
 
