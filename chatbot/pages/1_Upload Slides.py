@@ -3,15 +3,19 @@ from pipeline.pipeline_controller import PipelineController
 import tempfile
 import os
 
-@st.cache_resource(show_spinner=False)
+st.set_page_config(page_title="Upload Slides")
+
+
+@st.cache_resource(show_spinner=True)
 def get_pipeline_controller():
     # Create a database session object that points to the URL.
     return PipelineController()
 
+
 get_pipeline_controller()
 
-st.set_page_config(page_title="Upload Slides")
-uploaded_files = st.file_uploader(label="Upload multiple files", type="PDF", accept_multiple_files=True)
+uploaded_files = st.file_uploader(
+    label="Upload multiple files", type="PDF", accept_multiple_files=True)
 for uploaded_file in uploaded_files:
     file_name = uploaded_file.name
     print(file_name)

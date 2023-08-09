@@ -1,18 +1,28 @@
 # https://blog.streamlit.io/how-to-build-an-llm-powered-chatbot-with-streamlit/#4-session-state
 
 import streamlit as st
-import time
 from streamlit_chat import message
 from chat.chat_controller import ChatController
+from chat.prompt_strategy import PromptStrategyA
+from chat.feedback_controller import FeedbackController
 
-@st.cache_resource(show_spinner=False)
+st.set_page_config(page_title="Chat")
+
+# set prompt strategy to strategy A
+prompt_strategy = PromptStrategyA()
+
+
+@st.cache_resource(show_spinner=True)
 def get_chat_controller():
     # Create a database session object that points to the URL.
-    return ChatController()
+    return ChatController(prompt_strategy)
+
 
 get_chat_controller()
 
-st.set_page_config(page_title="Chat")
+# load feedback elements
+feedback_controller = FeedbackController(prompt_strategy)
+feedback_controller.load_st_component()
 
 # Store chat messages
 if "messages" not in st.session_state.keys():
@@ -27,7 +37,7 @@ for idx, message in enumerate(st.session_state.messages):
             with st.expander("Sources"):
                 st.write("\n\n".join(message['sources']))
 
-#User-provided prompt
+# User-provided prompt
 if prompt := st.chat_input():
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -38,7 +48,8 @@ if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner(""):
             chat_controller = get_chat_controller()
-            response = chat_controller.on_new_user_message(st.session_state.messages)
+            response = chat_controller.on_new_user_message(
+                st.session_state.messages)
             st.write(response['content'])
             with st.expander("Sources"):
                 st.write("\n\n".join(response['sources']))
