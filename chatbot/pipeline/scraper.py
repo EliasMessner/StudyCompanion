@@ -102,9 +102,9 @@ class MediumFooterRemovalHtmlPreprocessor(HtmlPreprocessor):
         soup = BeautifulSoup(html, "html.parser")
 
         footer = soup.find("footer")
-        footer_next_siblings = footer.find_next_siblings()
-
-        decompose_many([footer, *footer_next_siblings])
+        if footer:
+            footer_next_siblings = footer.find_next_siblings()
+            decompose_many([footer, *footer_next_siblings])
 
         return str(soup)
 

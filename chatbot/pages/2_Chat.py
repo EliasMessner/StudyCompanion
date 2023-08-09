@@ -3,14 +3,14 @@
 import streamlit as st
 import time
 from streamlit_chat import message
-from chatbot.pipeline.vectorstore_controller import VectorstoreController
+from chat.chat_controller import ChatController
 
 @st.cache_resource(show_spinner=False)
-def get_vectorstore_controller():
+def get_chat_controller():
     # Create a database session object that points to the URL.
-    return VectorstoreController()
+    return ChatController()
 
-get_vectorstore_controller()
+get_chat_controller()
 
 st.set_page_config(page_title="Chat")
 
@@ -20,9 +20,12 @@ if "messages" not in st.session_state.keys():
         {"role": "assistant", "content": "How may I help you?"}]
 
 # Display chat messages
-for message in st.session_state.messages:
+for idx, message in enumerate(st.session_state.messages):
     with st.chat_message(message["role"]):
         st.write(message["content"])
+        if message["role"] == "assistant" and idx != 0:
+            with st.expander("Sources"):
+                st.write("\n\n".join(message['sources']))
 
 #User-provided prompt
 if prompt := st.chat_input():
@@ -34,8 +37,9 @@ if prompt := st.chat_input():
 if st.session_state.messages[-1]["role"] != "assistant":
     with st.chat_message("assistant"):
         with st.spinner(""):
-            vectorstore_controller = get_vectorstore_controller()
-            response = vectorstore_controller.query_vectorstore(st.session_state.messages[-1]["content"], k=1)
-            st.write(response[0].page_content)
-    message = {"role": "assistant", "content": response[0].page_content}
-    st.session_state.messages.append(message)
+            chat_controller = get_chat_controller()
+            response = chat_controller.on_new_user_message(st.session_state.messages)
+            st.write(response['content'])
+            with st.expander("Sources"):
+                st.write("\n\n".join(response['sources']))
+    st.session_state.messages.append(response)

@@ -3,32 +3,45 @@ from langchain.vectorstores import Pinecone
 from langchain.chains import (LLMChain, RetrievalQA)
 from langchain.chains.combine_documents.stuff import StuffDocumentsChain
 from langchain.prompts import PromptTemplate
-from langchain.llms import OpenAI
-import pinecone
-import os
+from langchain.chat_models import ChatOpenAI
+from chat.uni_leipzig_chat_client import UniLeipzigChatClient
+from pipeline.vectorstore_controller import VectorstoreController
+from pipeline.document_preprocessing import documents_to_linebreaked_strings, documents_to_unique_metadata
 
-from dotenv import load_dotenv
-load_dotenv()
+
+class PromptTemplate:
+    def __init__(self, template, input_variables) -> None:
+        self.template = template
+        self.input_variables = input_variables
+
+    def create_prompt(self, **kwargs):
+        for key, value in kwargs.items():
+            if key not in self.input_variables: 
+                raise KeyError
+        
+        return self.template.format(**kwargs)
+
+template = """Use the following pieces of context to answer the question at the end. If possible, try to incorporate every context piece. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+
+{context}
+
+Question: {question}"""
+basic_context_prompt_template = PromptTemplate(template=template, input_variables=["context", "question"])
+
 
 class ChatController:
     def __init__(self):
-        index_name = os.getenv('PINECONE_INDEX_NAME')
-        openai_api_key = os.getenv('OPENAI_API_KEY')
-        pinecone.init(
-            api_key=os.getenv("PINECONE_API_KEY"),
-            environment=os.getenv("PINECONE_API_ENV")
-        )
+        self.vectorstore_controller = VectorstoreController()
+        self.chat_client = UniLeipzigChatClient()
 
-        embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-        vectorstore = Pinecone.from_existing_index(index_name=index_name, embedding=embeddings)
+    def on_new_user_message(self, messages: list):
+        user_message = messages[-1]
 
-        llm = OpenAI()
-        retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k": 3})
-        self.retrievalQA = RetrievalQA.from_llm(llm=llm, retriever=retriever, return_source_documents=True)
-        
-        #retrievalQA.from_chain_type(llm=llm, chain_type="stuff", retriever=retriever, return_source_documents=True)
+        documents = self.vectorstore_controller.query_vectorstore(query=user_message['content'], k=3)
+        sources = documents_to_unique_metadata(documents)
+        prompt = basic_context_prompt_template.create_prompt(context=documents_to_linebreaked_strings(documents), question=user_message['content'])
+        response = self.chat_client.request([{"role": "user", "content": prompt}])
+        message = response['choices'][0]['message']
+        message['sources'] = sources
 
-    def receive(self, text: str):
-        result = self.retrievalQA({"query": text})
-
-        return result
+        return message
