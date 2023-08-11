@@ -19,3 +19,4 @@ unstructured==0.7.1
 streamlit==1.25.0
 streamlit-chat==0.1.1
 openai==0.27.8
+trubrics==1.4.4
