@@ -8,8 +8,10 @@ from langchain.schema import Document
 
 LANGUAGES = ["english", "german"]
 
+
 def documents_to_linebreaked_strings(documents: List[Document]):
     return "\n\n".join(document.page_content for document in documents)
+
 
 def documents_to_unique_metadata(documents: List[Document]):
     metadata = [document.metadata for document in documents]
@@ -27,7 +29,9 @@ def documents_to_unique_metadata(documents: List[Document]):
 
 def get_stopwords(languages=LANGUAGES):
     nltk.download('stopwords')
+    nltk.download('punkt')
     return {sw for lang in languages for sw in nltk.corpus.stopwords.words(lang)}
+
 
 def split_documents(documents: List[Document]) -> List[Document]:
     text_splitter = CharacterTextSplitter(separator="\n\n", chunk_size=1000, chunk_overlap=200, length_function=len)
@@ -36,6 +40,7 @@ def split_documents(documents: List[Document]) -> List[Document]:
     texts = [document.page_content for document in documents]
 
     return text_splitter.create_documents(texts, metadatas)
+
 
 def remove_short_paragraphs_from_documents(documents: List[Document], paragraph_separator: str, k_words: int) -> List[Document]:
     output = []
@@ -49,10 +54,12 @@ def remove_short_paragraphs_from_documents(documents: List[Document], paragraph_
 
     return output
 
+
 def remove_short_documents(documents: List[Document], k_words: int) -> List[Document]:
     filtered_documents = filter(lambda document: len(document.page_content.split(" ")) > k_words, documents)
 
     return list(filtered_documents)
+
 
 def clean(documents: List[Document]) -> List[Document]:
     stopwords = get_stopwords()
