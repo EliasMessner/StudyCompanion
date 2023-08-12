@@ -44,7 +44,7 @@ class RetrievalQA(PromptStrategy):
         message = response['choices'][0]['message']
         message['sources'] = sources
         message['scores'] = scores
-        log_reply(start_time, user_message, message)
+        log_reply(start_time, user_message, message, "RetrievalQA")
         return message
 
 
@@ -85,7 +85,7 @@ class StandaloneQuestionConversationalRetrievalQA(PromptStrategy):
         message = response['choices'][0]['message']
         message['sources'] = sources
         message['scores'] = scores
-        log_reply(start_time, messages[-1], message)
+        log_reply(start_time, messages[-1], message, "StandaloneQuestionConversationalRetrievalQA")
         return message    
 
 
@@ -131,5 +131,5 @@ class SummarizedConversationPromptStrategy(PromptStrategy):
         message = final_response['choices'][0]['message']
         message['sources'] = sources
         message['scores'] = scores
-        log_reply(start_time, messages[-1], message)
+        log_reply(start_time, messages[-1], message, "SummarizedConversationPromptStrategy")
         return message
