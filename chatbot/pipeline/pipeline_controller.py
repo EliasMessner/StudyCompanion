@@ -19,6 +19,12 @@ class PipelineController:
     def ingest_pdf(self, path: str):
         documents = load_pdf(path)
         filtered_documents = remove_short_documents(documents, k_words=15)
+        nonduplicate_documents = []
+        for document in filtered_documents:
+            if self.vectorstore_controller.query_vectorstore(document.page_content, k=1)[0][1]<0.99:
+                nonduplicate_documents.append(document)
+                print("duplicate detected")
+        filtered_documents = nonduplicate_documents        
         self.vectorstore_controller.add_documents_to_vectorstore(filtered_documents)
 
         keywords = get_keywords(documents)
