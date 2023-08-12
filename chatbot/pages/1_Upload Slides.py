@@ -2,6 +2,7 @@ import streamlit as st
 from pipeline.pipeline_controller import PipelineController
 import tempfile
 import os
+import time
 
 st.set_page_config(page_title="Upload Slides")
 
@@ -28,7 +29,9 @@ for uploaded_file in uploaded_files:
         file = open(path, 'w+b')
         file.write(bytes_data)
         pipeline_controller = get_pipeline_controller()
+        start_time = time.time()
         with st.spinner(text="Ingesting file"):
             pipeline_controller.ingest_pdf(path)
+        print("Ingestion time: ", time.time() - start_time, "seconds")
 
         success = st.success("Successfully ingested files! You can now chat with the bot.")
