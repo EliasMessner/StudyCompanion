@@ -3,7 +3,7 @@ import time
 import streamlit as st
 from streamlit_chat import message
 from chat.chat_controller import ChatController
-from chat.prompt_strategy import PromptStrategyA, SummarizedConversationPromptStrategy
+from chat.prompt_strategy import RetrievalQA, SummarizedConversationPromptStrategy
 from chat.feedback_controller import FeedbackController
 
 st.set_page_config(page_title="Chat")

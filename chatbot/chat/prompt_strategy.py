@@ -22,14 +22,14 @@ class PromptStrategy(ABC):
         return template.format(**kwargs)
 
     @abstractmethod
-    def execute(self, **kwargs):
+    def execute(self, messages):
         """
         Takes some input like context and question and returns the final message from the LLM to show the user.
         """
         raise NotImplementedError
 
 
-class PromptStrategyA(PromptStrategy):
+class RetrievalQA(PromptStrategy):
     """
     strategy, where the prompt does not hold any previous context
     """
@@ -37,7 +37,7 @@ class PromptStrategyA(PromptStrategy):
     def __init__(self) -> None:
         super().__init__(input_variables=['context', 'question'])
 
-    def execute(self, **kwargs):
+    def execute(self, messages):
         final_prompt_template = """Use the context to answer the question. Context and question are delimited by XML tags. If the context is not sufficient, say so and don't make up an answer.
 
                 <context>
@@ -48,7 +48,7 @@ class PromptStrategyA(PromptStrategy):
                 {question}
                 </question>"""
 
-        user_message = kwargs["messages"][-1]
+        user_message = messages[-1]
         # documents are a list of tuples (document, score)
         documents_with_scores = self.vectorstore_controller.query_vectorstore(
             query=user_message['content'], k=3)
@@ -66,42 +66,4 @@ class PromptStrategyA(PromptStrategy):
         message['sources'] = sources
         message['scores'] = scores
         return message
-
-
-class SummarizedConversationPromptStrategy(PromptStrategy):
-    """
-    Strategy where the prompt contains a summary of the conversation.
-    A first prompt is generated, which is then sent to the chatbot, which then generates a second and final prompt.
-    The final prompt contains the summary of the conversation and the follow-up question.
-    """
-
-    def __init__(self) -> None:
-        self.first_prompt_template = \
-            """\
-            Given the following conversation and a follow up question, return the conversation history excerpt that\
-            includes any relevant context to the question if it exists and rephrase the follow-up question to be a\
-            standalone question.
-            Chat History: {chat_history}
-            Follow Up Input: {follow_up_input}
-            Your answer should follow the following format (replace only the text between the XML tags and keep the tags):
-            \"\"\"
-            Use the following pieces of context to answer the users question.\
-            If you don't know the answer, just say that you don't know, don't try to make up an answer.
-            ----------------
-            <context>
-            *Relevant chat history excerpt as context here*
-            </context>
-            <question>
-            *Rephrased question here*
-            </question>
-            \"\"\"
-            """
-        super().__init__(input_variables=['chat_history', 'follow_up_input'])
-
-    def generate_final_prompt(self, **kwargs):
-        first_prompt = self.generate_prompt(**kwargs)
-        chat_client = UniLeipzigChatClient()
-        response = chat_client.request(messages=[first_prompt])
-        second_prompt = response['choices'][0]['message']
-        return second_prompt
 
