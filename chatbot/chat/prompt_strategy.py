@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-
+import time
 from chat.uni_leipzig_chat_client import UniLeipzigChatClient
 from chat.prompt_template import fill_simple_retrieval_qa_template, fill_standalone_question_generation_template, fill_summarization_template
 from pipeline.document_preprocessing import documents_to_unique_metadata, documents_to_linebreaked_strings
 from pipeline.vectorstore_controller import VectorstoreController
+from pipeline.mlflow_tracking import log_reply
 
 
 class PromptStrategy(ABC):
@@ -27,6 +28,7 @@ class RetrievalQA(PromptStrategy):
     """
 
     def execute(self, messages):
+        start_time = time.time()
         user_message = messages[-1]
         # documents are a list of tuples (document, score)
         documents_with_scores = self.vectorstore_controller.query_vectorstore(
@@ -43,6 +45,7 @@ class RetrievalQA(PromptStrategy):
         message = response['choices'][0]['message']
         message['sources'] = sources
         message['scores'] = scores
+        log_reply(start_time, user_message, message)
         return message
 
 
@@ -50,6 +53,7 @@ class RetrievalQA(PromptStrategy):
 class StandaloneQuestionConversationalRetrievalQA(PromptStrategy):
     
     def execute(self, messages):
+        start_time = time.time()
         chat_history = messages[1:-1]
 
         # generate new standalone question if there is a chat history
@@ -82,6 +86,7 @@ class StandaloneQuestionConversationalRetrievalQA(PromptStrategy):
         message = response['choices'][0]['message']
         message['sources'] = sources
         message['scores'] = scores
+        log_reply(start_time, messages[-1], message)
         return message    
 
 
@@ -93,6 +98,7 @@ class SummarizedConversationPromptStrategy(PromptStrategy):
     """
 
     def execute(self, messages):
+        start_time = time.time()
         follow_up_question = messages[-1]['content']
         chat_history = messages[:-1]
         # create first prompt from template
@@ -126,4 +132,5 @@ class SummarizedConversationPromptStrategy(PromptStrategy):
         message = final_response['choices'][0]['message']
         message['sources'] = sources
         message['scores'] = scores
+        log_reply(start_time, messages[-1], message)
         return message
