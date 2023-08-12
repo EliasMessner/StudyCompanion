@@ -1,8 +1,8 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  namespace: test-matkowitz
-  name: demo-ingress
+  namespace: se4ai-chatbot
+  name: se4ai-chatbot-ingress
   annotations:
     cert.manager.io/cluster-issuer: letsencrypt-prod
 spec:
@@ -14,7 +14,7 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: demo-svc
+            name: se4ai-chatbot-service
             port:
               number: 80
   tls:

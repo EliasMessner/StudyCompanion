@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     software-properties-common \
     git \
+    chromium \
     && rm -rf /var/lib/apt/lists/*
 
 COPY chatbot ./chatbot
@@ -18,4 +19,4 @@ EXPOSE 8501
 
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/health
 
-ENTRYPOINT ["streamlit", "run", "chatbot/client/Home.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "chatbot/Home.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: se4ai-chatbot
+  name: se4ai-chatbot-service
+spec:
+  selector:
+    app: se4ai-chatbot-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8501

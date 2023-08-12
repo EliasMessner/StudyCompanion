@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: se4ai-chatbot
+  name: se4ai-chatbot-deployment
+  labels:
+    app: se4ai-chatbot-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: se4ai-chatbot-app
+  template:
+    metadata:
+      labels:
+        app: se4ai-chatbot-app
+    spec:
+      containers:
+      - name: se4ai-chatbot
+        image: mmatkowi/se4ai-chatbot:1.0
+        ports:
+        - containerPort: 8501
