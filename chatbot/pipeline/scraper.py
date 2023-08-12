@@ -123,12 +123,14 @@ class Scraper:
             options = Options()
             options.binary_location = self.browser_binary_location
             options.headless = True
+            options.add_argument("--no-sandbox")
             self.driver = webdriver.Firefox(options=options)
         elif self.browser == "chrome":
             from selenium.webdriver.chrome.options import Options
             options = Options()
             options.binary_location = self.browser_binary_location
             options.headless = True
+            options.add_argument("--no-sandbox")
             self.driver = webdriver.Chrome(options=options)
 
         self.session = requests.Session()

@@ -20,3 +20,32 @@ spec:
         image: mmatkowi/se4ai-chatbot:1.0
         ports:
         - containerPort: 8501
+        env:
+        - name: PINECONE_INDEX_NAME
+          value: "se4ai-chatbot"
+        - name: PINECONE_API_ENV
+          value: "ab91b8b6-14bc-4a1f-9927-5faacd91bea6"
+        - name: BROWSER
+          value: "chrome"
+        - name: BROWSER_BINARY_LOCATION
+          value: "/usr/bin/chromium"
+        - name: PINECONE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: pinecone-api-key-secret
+              key: pinecone-api-key
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-api-key-secret
+              key: openai-api-key
+        - name: TRUBRICS_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: trubrics-email-secret
+              key: trubrics-email
+        - name: TRUBRICS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: trubrics-password-secret
+              key: trubrics-password
