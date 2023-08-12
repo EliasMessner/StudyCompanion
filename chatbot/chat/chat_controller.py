@@ -1,5 +1,4 @@
-from chat.prompt_strategy import RetrievalQA, StandaloneQuestionConversationalRetrievalQA
-
+from chat.prompt_strategy import StandaloneQuestionConversationalRetrievalQA, SummarizedConversationPromptStrategy
 
 class ChatController:
     def __init__(self):
