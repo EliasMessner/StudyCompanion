@@ -22,7 +22,6 @@ get_chat_controller()
 
 # load feedback elements
 feedback_controller = FeedbackController(prompt_strategy)
-feedback_controller.load_st_component()
 
 # Store chat messages
 if "messages" not in st.session_state.keys():
@@ -64,3 +63,4 @@ if st.session_state.messages[-1]["role"] != "assistant":
 
         with st.expander("Sources"):
             st.write("\n\n".join(assistant_response['sources']))
+        feedback_controller.load_st_component()
