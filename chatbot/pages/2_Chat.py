@@ -51,8 +51,8 @@ if st.session_state.messages[-1]["role"] != "assistant":
 
         with st.spinner(""):
             chat_controller = get_chat_controller()
-            assistant_response = chat_controller.on_new_user_message(
-                st.session_state.messages)
+            assistant_response = chat_controller.on_new_user_message(st.session_state.messages)
+            st.session_state.messages.append({"role": "assistant", "content": assistant_response['content'], "sources": assistant_response['sources']})
 
         # Simulate stream of response content with milliseconds delay
         for chunk in assistant_response['content'].split():
@@ -61,9 +61,6 @@ if st.session_state.messages[-1]["role"] != "assistant":
             # Add a blinking cursor to simulate typing
             message_placeholder.markdown(full_response + "▌")
         message_placeholder.markdown(full_response)
-        # st.write(assistant_response['content'])
+
         with st.expander("Sources"):
             st.write("\n\n".join(assistant_response['sources']))
-    # Add assistant response to chat history
-    st.session_state.messages.append(
-        {"role": "assistant", "content": full_response})
