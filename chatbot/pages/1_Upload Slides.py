@@ -5,6 +5,9 @@ import os
 
 st.set_page_config(page_title="Upload Slides")
 
+
+st.subheader('Upload your PDF Files')
+
 @st.cache_resource(show_spinner=True)
 def get_pipeline_controller():
     # Create a database session object that points to the URL.
@@ -14,7 +17,7 @@ def get_pipeline_controller():
 get_pipeline_controller()
 
 uploaded_files = st.file_uploader(
-    label="Upload multiple files", type="PDF", accept_multiple_files=True)
+    label="empty-label", type="PDF", accept_multiple_files=True, label_visibility='hidden')
 for uploaded_file in uploaded_files:
     file_name = uploaded_file.name
     print(file_name)

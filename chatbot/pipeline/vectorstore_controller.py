@@ -35,12 +35,16 @@ class VectorstoreController:
 
     def add_documents_to_vectorstore(self, documents: list[Document]):
         """
-        Creates embeddings from documents and stores them in the pinecone index.
+        Creates embeddings from documents and stores them in the pinecone index. It ensures that no duplicates are uploaded to the index.
 
         :param documents: The documents array to embed and store in the index
         :return: list of ids from adding the documents into the vectorstore.
         """
-        added_documents = self.vectorstore.add_documents(documents)
+        no_duplicates_documents = []
+        for document in documents:
+            if self.query_vectorstore(document.page_content, k=1)[0][1]<0.99:
+                no_duplicates_documents.append(document)
+        added_documents = self.vectorstore.add_documents(no_duplicates_documents)
         self.logger.info(f"Added {len(added_documents)} documents to vector store")
 
         return added_documents
