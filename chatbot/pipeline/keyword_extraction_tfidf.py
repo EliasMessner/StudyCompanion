@@ -1,11 +1,11 @@
-from langchain.document_loaders import PyPDFLoader
 from langchain.schema import Document
 from sklearn.feature_extraction.text import TfidfVectorizer
 from typing import List
-import nltk
-import string
+from typing import List
 
-from pipeline.document_preprocessing import clean
+from langchain.schema import Document
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 
 def documents_to_str(documents: list[Document]):
     return ' '.join(document.page_content for document in documents)

@@ -61,6 +61,7 @@ def remove_short_documents(documents: List[Document], k_words: int) -> List[Docu
     return list(filtered_documents)
 
 
+# TODO: remove if not used
 def clean(documents: List[Document]) -> List[Document]:
     stopwords = get_stopwords()
  
