@@ -22,3 +22,4 @@ streamlit-feedback==0.0.9
 openai==0.27.8
 trubrics==1.4.4
 sentence-transformers==2.2.2
+mlflow==2.5.0
