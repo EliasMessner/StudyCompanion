@@ -27,10 +27,10 @@ def documents_to_unique_metadata(documents: List[Document]):
     return list(set(unique_metadata))
 
 
-def get_stopwords(languages=LANGUAGES):
+def get_stopwords(languages=LANGUAGES) -> list:
     nltk.download('stopwords')
     nltk.download('punkt')
-    return {sw for lang in languages for sw in nltk.corpus.stopwords.words(lang)}
+    return list({sw for lang in languages for sw in nltk.corpus.stopwords.words(lang)})  # list of set to remove duplicates
 
 
 def split_documents(documents: List[Document]) -> List[Document]:
