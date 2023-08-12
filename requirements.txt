@@ -20,3 +20,5 @@ streamlit==1.25.0
 streamlit-chat==0.1.1
 openai==0.27.8
 trubrics==1.4.4
+streamlit_feedback==0.0.9
+sentence_transformers==2.2.2
