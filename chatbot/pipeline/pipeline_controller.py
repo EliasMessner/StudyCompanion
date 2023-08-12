@@ -18,7 +18,7 @@ class PipelineController:
 
     def ingest_pdf(self, path: str):
         documents = load_pdf(path)
-        filtered_documents = remove_short_documents(documents, k_words=15)
+        filtered_documents = remove_short_documents(documents, k_words=15)        
         self.vectorstore_controller.add_documents_to_vectorstore(filtered_documents)
 
         keywords = get_keywords(documents)
