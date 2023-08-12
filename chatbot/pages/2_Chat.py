@@ -12,6 +12,7 @@ st.set_page_config(page_title="Chat")
 prompt_strategy = PromptStrategyA()
 
 
+
 @st.cache_resource(show_spinner=True)
 def get_chat_controller():
     # Create a database session object that points to the URL.
@@ -35,6 +36,9 @@ for idx, message in enumerate(st.session_state.messages):
         if message["role"] == "assistant" and idx != 0:
             with st.expander("Sources"):
                 st.write("\n\n".join(message['sources']))
+            # show thumbs up/down feedback
+            user_question = st.session_state.messages[idx-1]['content']
+            feedback_controller.load_st_component(key=idx, prompt_question=user_question, prompt_answer=message["content"])
 
 # User-provided prompt
 if prompt := st.chat_input():
@@ -63,4 +67,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
 
         with st.expander("Sources"):
             st.write("\n\n".join(assistant_response['sources']))
-        feedback_controller.load_st_component()
+
+         # show thumbs up/down feedback
+        user_question = st.session_state.messages[-1]['content']
+        feedback_controller.load_st_component(key=str(len(st.session_state.messages)-1), prompt_question=user_question, prompt_answer=assistant_response['content'])
