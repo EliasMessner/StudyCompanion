@@ -39,7 +39,6 @@ class RetrievalQA(PromptStrategy):
         print(prompt)
         response = self.chat_client.request(
             [{"role": "user", "content": prompt}])
-        print(response)
         message = response['choices'][0]['message']
         message['sources'] = sources
         message['scores'] = scores

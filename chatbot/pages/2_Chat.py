@@ -8,7 +8,6 @@ from chat.feedback_controller import FeedbackController
 st.set_page_config(page_title="Chat")
 
 
-
 @st.cache_resource(show_spinner=True)
 def get_chat_controller():
     # Create a database session object that points to the URL.
@@ -16,6 +15,10 @@ def get_chat_controller():
 
 
 get_chat_controller()
+
+if strategy_option := st.selectbox('', ('RetrievalQA', 'SummarizedConversationRetrievalQA', 'StandaloneQuestionConversationalRetrievalQA'), label_visibility="hidden"):
+    # set option
+    get_chat_controller().set_prompt_strategy(strategy_option)
 
 # load feedback elements
 feedback_controller = FeedbackController(get_chat_controller().prompt_strategy)
@@ -50,8 +53,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
         full_response = ""
 
         with st.spinner(""):
-            chat_controller = get_chat_controller()
-            assistant_response = chat_controller.on_new_user_message(st.session_state.messages)
+            assistant_response =  get_chat_controller().on_new_user_message(st.session_state.messages)
             st.session_state.messages.append(assistant_response)
 
         # Simulate stream of response content with milliseconds delay
