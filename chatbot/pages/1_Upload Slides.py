@@ -5,7 +5,6 @@ import os
 
 st.set_page_config(page_title="Upload Slides")
 
-
 @st.cache_resource(show_spinner=True)
 def get_pipeline_controller():
     # Create a database session object that points to the URL.
@@ -28,3 +27,5 @@ for uploaded_file in uploaded_files:
         pipeline_controller = get_pipeline_controller()
         with st.spinner(text="Ingesting file"):
             pipeline_controller.ingest_pdf(path)
+
+        success = st.success("Successfully ingested files! You can now chat with the bot.")
