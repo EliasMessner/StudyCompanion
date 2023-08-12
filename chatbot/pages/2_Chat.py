@@ -51,7 +51,9 @@ if st.session_state.messages[-1]["role"] != "assistant":
 
         with st.spinner(""):
             chat_controller = get_chat_controller()
+            start_time = time.time()
             assistant_response = chat_controller.on_new_user_message(st.session_state.messages)
+            print("Response time: ", time.time() - start_time, "seconds")
             st.session_state.messages.append(assistant_response)
 
         # Simulate stream of response content with milliseconds delay
