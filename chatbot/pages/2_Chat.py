@@ -38,7 +38,8 @@ for idx, message in enumerate(st.session_state.messages):
                 st.write("\n\n".join(message['sources']))
             # show thumbs up/down feedback
             user_question = st.session_state.messages[idx-1]['content']
-            feedback_controller.load_st_component(key=idx, prompt_question=user_question, prompt_answer=message["content"])
+            scores = message['scores']
+            feedback_controller.load_st_component(key=idx, prompt_question=user_question, prompt_answer=message["content"], scores=scores)
 
 # User-provided prompt
 if prompt := st.chat_input():
@@ -55,7 +56,7 @@ if st.session_state.messages[-1]["role"] != "assistant":
         with st.spinner(""):
             chat_controller = get_chat_controller()
             assistant_response = chat_controller.on_new_user_message(st.session_state.messages)
-            st.session_state.messages.append({"role": "assistant", "content": assistant_response['content'], "sources": assistant_response['sources']})
+            st.session_state.messages.append(assistant_response)
 
         # Simulate stream of response content with milliseconds delay
         for chunk in assistant_response['content'].split():
@@ -70,4 +71,5 @@ if st.session_state.messages[-1]["role"] != "assistant":
 
          # show thumbs up/down feedback
         user_question = st.session_state.messages[-1]['content']
-        feedback_controller.load_st_component(key=str(len(st.session_state.messages)-1), prompt_question=user_question, prompt_answer=assistant_response['content'])
+        scores = st.session_state.messages[-1]['scores']
+        feedback_controller.load_st_component(key=str(len(st.session_state.messages)-1), prompt_question=user_question, prompt_answer=assistant_response['content'], scores=scores)

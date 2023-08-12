@@ -21,14 +21,16 @@ class ChatController:
         #documents are a list of tuples (document, score)
         documents_with_scores = self.vectorstore_controller.query_vectorstore(
             query=user_message['content'], k=3)
-        documents= [document[0] for document in documents_with_scores]
+        documents = [document[0] for document in documents_with_scores]
+        scores = [document[1] for document in documents_with_scores]
         sources = documents_to_unique_metadata(documents)
         prompt = self.prompt_strategy.generate_prompt(
             context=documents_to_linebreaked_strings(documents), question=user_message['content'])
         print(prompt)
         response = self.chat_client.request(
             [{"role": "user", "content": prompt}])
+        print(response)
         message = response['choices'][0]['message']
         message['sources'] = sources
-
+        message['scores'] = scores
         return message
