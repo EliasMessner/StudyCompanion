@@ -18,9 +18,10 @@ class ChatController:
 
     def on_new_user_message(self, messages: list):
         user_message = messages[-1]
-
-        documents = self.vectorstore_controller.query_vectorstore(
+        #documents are a list of tuples (document, score)
+        documents_with_scores = self.vectorstore_controller.query_vectorstore(
             query=user_message['content'], k=3)
+        documents= [document[0] for document in documents_with_scores]
         sources = documents_to_unique_metadata(documents)
         prompt = self.prompt_strategy.generate_prompt(
             context=documents_to_linebreaked_strings(documents), question=user_message['content'])
