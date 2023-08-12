@@ -3,26 +3,22 @@ import time
 import streamlit as st
 from streamlit_chat import message
 from chat.chat_controller import ChatController
-from chat.prompt_strategy import PromptStrategyA
 from chat.feedback_controller import FeedbackController
 
 st.set_page_config(page_title="Chat")
-
-# set prompt strategy to strategy A
-prompt_strategy = PromptStrategyA()
 
 
 
 @st.cache_resource(show_spinner=True)
 def get_chat_controller():
     # Create a database session object that points to the URL.
-    return ChatController(prompt_strategy)
+    return ChatController()
 
 
 get_chat_controller()
 
 # load feedback elements
-feedback_controller = FeedbackController(prompt_strategy)
+feedback_controller = FeedbackController(get_chat_controller().prompt_strategy)
 
 # Store chat messages
 if "messages" not in st.session_state.keys():
