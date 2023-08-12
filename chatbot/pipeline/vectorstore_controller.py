@@ -52,13 +52,13 @@ class VectorstoreController:
         :param query: The query to search for in the pinecone index
         :param k: amount of documents to return
         :param get_raw_text: whether raw texts of the documents should be returned
-        :return: k most relevant documents 
+        :return: k most relevant documents with similarity score > 0.5
         """
-        documents = self.vectorstore.similarity_search(query=query, k=k)
-
+        documents_with_scores = self.vectorstore.similarity_search_with_score(query=query, k=k)
+        documents_with_scores = [document for document in documents_with_scores if document[1] > 0.5]
         if get_raw_text:
-            documents = [document.page_content for document in documents]
+            documents_with_scores = [(document[0].page_content,document[1]) for document in documents]
+        print(documents_with_scores)
+        self.logger.info(f"Received {len(documents_with_scores)} documents from querying vectorstore")
 
-        self.logger.info(f"Received {len(documents)} documents from querying vectorstore")
-
-        return documents
+        return documents_with_scores

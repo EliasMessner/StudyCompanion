@@ -15,13 +15,15 @@ class PromptStrategyA(PromptStrategy):
     """
 
     def __init__(self) -> None:
-        prompt_template = """\
-        Use the following pieces of context to answer the question at the end. If possible, try to incorporate every\
-        context piece. If you don't know the answer, just say that you don't know, don't try to make up an answer.
+        prompt_template = """Use the context to answer the question. Context and question are delimited by XML tags. If the context is not sufficient, say so and don't make up an answer.
 
+        <context>
         {context}
+        </context>
 
-        Question: {question}"""
+        <question>
+        {question}
+        </question>"""
         super().__init__(name="Strategy A", template=prompt_template,
                          input_variables=['context', 'question'])
 

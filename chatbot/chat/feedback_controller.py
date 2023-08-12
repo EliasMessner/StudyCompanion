@@ -14,7 +14,8 @@ class FeedbackController:
             password=os.environ.get("TRUBRICS_PASSWORD"),
         )
 
-    def load_st_component(self):
+    def load_st_component(self, key, prompt_question, prompt_answer, scores):
+        metadata = {'question': prompt_question, 'answer': prompt_answer, 'scores': scores}
         # model name has to be something like prompt_strategy_a or prompt_strategy_b
         self.collector.st_feedback(feedback_type="thumbs", model=self.prompt_strategy.name,
-                                   open_feedback_label="[Optional] Provide additional feedback",)
+                                   open_feedback_label="[Optional] Provide additional feedback", key=key, metadata=metadata)
