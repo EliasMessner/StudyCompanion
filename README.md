@@ -37,7 +37,11 @@ pip-chill > requirements.txt
 ### Set up environment variable file for credentials
 
 Create .env-file inside project folder
+
+touch .env
 ```
+Open the .env file
+
 nano .env
 vi .env
 ```
