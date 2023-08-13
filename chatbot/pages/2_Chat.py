@@ -16,9 +16,12 @@ def get_chat_controller():
 
 get_chat_controller()
 
-if strategy_option := st.selectbox('', ('RetrievalQA', 'SummarizedConversationRetrievalQA', 'StandaloneQuestionConversationalRetrievalQA'), label_visibility="hidden"):
-    # set option
+# let user select chat options
+if strategy_option := st.selectbox('Prompt Strategy', ('RetrievalQA', 'SummarizedConversationRetrievalQA', 'StandaloneQuestionConversationalRetrievalQA')):
     get_chat_controller().set_prompt_strategy(strategy_option)
+
+if language_option := st.selectbox('Language', ('English', 'German')):
+    get_chat_controller().set_language(language_option)
 
 # load feedback elements
 feedback_controller = FeedbackController(get_chat_controller().prompt_strategy)
@@ -38,7 +41,8 @@ for idx, message in enumerate(st.session_state.messages):
             # show thumbs up/down feedback
             user_question = st.session_state.messages[idx-1]['content']
             scores = message['scores']
-            feedback_controller.load_st_component(key=idx, prompt_question=user_question, prompt_answer=message["content"], scores=scores)
+            feedback_controller.load_st_component(
+                key=idx, prompt_question=user_question, prompt_answer=message["content"], scores=scores)
 
 # User-provided prompt
 if prompt := st.chat_input():
@@ -53,7 +57,8 @@ if st.session_state.messages[-1]["role"] != "assistant":
         full_response = ""
 
         with st.spinner(""):
-            assistant_response =  get_chat_controller().on_new_user_message(st.session_state.messages)
+            assistant_response = get_chat_controller(
+            ).on_new_user_message(st.session_state.messages)
             st.session_state.messages.append(assistant_response)
 
         # Simulate stream of response content with milliseconds delay
@@ -70,4 +75,5 @@ if st.session_state.messages[-1]["role"] != "assistant":
          # show thumbs up/down feedback
         user_question = st.session_state.messages[-1]['content']
         scores = st.session_state.messages[-1]['scores']
-        feedback_controller.load_st_component(key=str(len(st.session_state.messages)-1), prompt_question=user_question, prompt_answer=assistant_response['content'], scores=scores)
+        feedback_controller.load_st_component(key=str(len(
+            st.session_state.messages)-1), prompt_question=user_question, prompt_answer=assistant_response['content'], scores=scores)
