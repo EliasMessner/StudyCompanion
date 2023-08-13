@@ -17,14 +17,17 @@ spec:
     spec:
       containers:
       - name: se4ai-chatbot
-        image: mmatkowi/se4ai-chatbot:1.0
+        image: mmatkowi/se4ai-chatbot:1.2
         ports:
         - containerPort: 8501
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: dshm
         env:
         - name: PINECONE_INDEX_NAME
           value: "se4ai-chatbot"
         - name: PINECONE_API_ENV
-          value: "ab91b8b6-14bc-4a1f-9927-5faacd91bea6"
+          value: "asia-southeast1-gcp-free"
         - name: BROWSER
           value: "chrome"
         - name: BROWSER_BINARY_LOCATION
@@ -49,3 +52,8 @@ spec:
             secretKeyRef:
               name: trubrics-password-secret
               key: trubrics-password
+      volumes:
+      - name: dshm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
