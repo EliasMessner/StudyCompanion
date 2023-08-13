@@ -42,7 +42,9 @@ class VectorstoreController:
         """
         no_duplicates_documents = []
         for document in documents:
-            if self.query_vectorstore(document.page_content, k=1)[0][1]<0.99:
+            if not self.query_vectorstore(document.page_content, k=1):
+                no_duplicates_documents.append(document)
+            elif self.query_vectorstore(document.page_content, k=1)[0][1]<0.99:
                 no_duplicates_documents.append(document)
         added_documents = self.vectorstore.add_documents(no_duplicates_documents)
         self.logger.info(f"Added {len(added_documents)} documents to vector store")
@@ -61,8 +63,7 @@ class VectorstoreController:
         documents_with_scores = self.vectorstore.similarity_search_with_score(query=query, k=k)
         documents_with_scores = [document for document in documents_with_scores if document[1] > 0.5]
         if get_raw_text:
-            documents_with_scores = [(document[0].page_content,document[1]) for document in documents]
-        print(documents_with_scores)
+            documents_with_scores = [(document[0].page_content,document[1]) for document in documents_with_scores]
         self.logger.info(f"Received {len(documents_with_scores)} documents from querying vectorstore")
 
         return documents_with_scores
