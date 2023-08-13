@@ -16,7 +16,6 @@ spec:
         app: se4ai-chatbot-app
     spec:
       containers:
-<<<<<<< HEAD
       - name: se4ai-chatbot
         image: mmatkowi/se4ai-chatbot:1.2
         ports:
@@ -58,7 +57,6 @@ spec:
         emptyDir:
           medium: Memory
           sizeLimit: 1Gi
-=======
         - name: se4ai-chatbot
           image: mmatkowi/se4ai-chatbot:1.2
           ports:
@@ -92,4 +90,3 @@ spec:
                 secretKeyRef:
                   name: trubrics-password-secret
                   key: trubrics-password
->>>>>>> 9c9bbfb7f965950f79199bb783ab10fdc884e469
