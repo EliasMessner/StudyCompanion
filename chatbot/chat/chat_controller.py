@@ -1,4 +1,6 @@
-from chat.prompt_strategy import RetrievalQA, StandaloneQuestionConversationalRetrievalQA, SummarizedConversationPromptStrategy
+from chat.prompt_strategies.retrieval_qa import RetrievalQA
+from chat.prompt_strategies.standalone_question_qa import StandaloneQuestionConversationalRetrievalQA
+from chat.prompt_strategies.summarized_conv_qa import SummarizedConversationPromptStrategy
 
 # map string option from dropdown menu to strategy class instance
 strategy_map = {
