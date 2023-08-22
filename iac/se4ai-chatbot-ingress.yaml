@@ -5,6 +5,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    cert.manager.io/cluster-issuer: letsencrypt-prod
   namespace: se4ai-chatbot
   name: se4ai-chatbot-ingress
   # annotations:
@@ -21,7 +22,7 @@ spec:
                 name: se4ai-chatbot-service
                 port:
                   number: 80
-  # tls:
-  # - hosts:
-  #   - group7.se4ai.sws.informatik.uni-leipzig.de
-  #   secretName: group7.se4ai.sws.informatik.uni-leipzig.de-tls
+  tls:
+  - hosts:
+    - group7.se4ai.sws.informatik.uni-leipzig.de
+    secretName: group7.se4ai.sws.informatik.uni-leipzig.de-tls
