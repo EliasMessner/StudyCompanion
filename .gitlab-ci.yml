@@ -20,13 +20,6 @@ stages:          # List of stages for jobs, and their order of execution
   - build
   - deploy
 
-variables:
-  GIT_DEPTH: 1
-  BRANCH_NAME: "main"
-  BOT_NAME: "ConfigUpdater"
-  BOT_EMAIL: "config-bot@bot.io"
-  COMMIT_MESSAGE: "[AUTOMATIC] Updated Kubernetes config file"
-
 build:
   stage: build
   image:
@@ -39,38 +32,6 @@ build:
       --context "${CI_PROJECT_DIR}"
       --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}"
-  rules:
-    - if: $CI_COMMIT_TAG
-
-.update_config_file: &update_config_file |
-  envsubst < ${CI_PROJECT_DIR}/iac/se4ai-chatbot-deployment.yaml > ${CI_PROJECT_DIR}/iac/se4ai-chatbot-deployment.yaml
-
-.push_config_file: &push_config_file |
-  git status
-  lines=$(git status -s | wc -l)
-  if [ $lines -gt 0 ];then
-    echo "committing"
-    git config --global user.name "${BOT_NAME}"
-    git config --global user.email "${BOT_EMAIL}"
-    git add .
-    git commit -m "${COMMIT_MESSAGE}"
-    echo "git push -o ci.skip 'https://{CI_REPOSITORY_TOKEN_RW}@${CI_REPOSITORY_URL#*@}' ${BRANCH_NAME}"
-    git push -o ci.skip "https://${CI_REPOSITORY_TOKEN_RW}@${CI_REPOSITORY_URL#*@}" $BRANCH_NAME
-  else
-    echo "no change, nothing to commit"
-  fi
-
-update_image:
-  stage: deploy
-  image: alpine:latest
-  before_script:
-    - apk add bash git
-    - git fetch
-    - git checkout $BRANCH_NAME
-    - cd $CI_PROJECT_DIR
-  script:
-    - *update_config_file
-    - *push_config_file 
   rules:
     - if: $CI_COMMIT_TAG
 
