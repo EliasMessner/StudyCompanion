@@ -50,3 +50,23 @@ update_image:
     kubectl set image deployment/se4ai-chatbot-deployment se4ai-chatbot=${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
   rules:
     - if: $CI_COMMIT_TAG
+
+update_configuration:
+  stage: deploy
+  image:
+    name: bitnami/kubectl
+    entrypoint: [""]
+  before_script:
+    - kubectl config set-cluster voyager --server=https://rancher.sws.informatik.uni-leipzig.de/k8s/clusters/c-m-brg24gnx
+    - kubectl config set-credentials voyager --token=${BEARER_KEY}
+    - kubectl config set-context voyager --cluster=voyager
+    - kubectl config set-context voyager --user=voyager
+    - kubectl config use-context voyager
+  script:
+    kubectl apply
+      -f iac/se4ai-chatbot-deployment.yaml
+      -f iac/se4ai-chatbot-service.yaml
+      -f iac/se4ai-chatbot-ingress.yaml
+  only:
+    changes:
+      - iac/*
