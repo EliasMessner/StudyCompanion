@@ -37,7 +37,9 @@ build:
 
 update_image:
   stage: deploy
-  image: bitnami/kubectl
+  image:
+    name: bitnami/kubectl
+    entrypoint: [""]
   before_script:
     - kubectl config set-cluster voyager --server=https://rancher.sws.informatik.uni-leipzig.de/k8s/clusters/c-m-brg24gnx
     - kubectl config set-credentials voyager --token=${BEARER_KEY}
