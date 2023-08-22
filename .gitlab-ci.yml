@@ -53,7 +53,7 @@ build:
     git config --global user.name "${BOT_NAME}"
     git config --global user.email "${BOT_EMAIL}"
     git add .
-    git commit -m "${COMMIT_MESSAGE} ${CI_RUNNER_ID}"
+    git commit -m "${COMMIT_MESSAGE}"
     echo "git push -o ci.skip 'https://{CI_REPOSITORY_TOKEN_RW}@${CI_REPOSITORY_URL#*@}' ${BRANCH_NAME}"
     git push -o ci.skip "https://${CI_REPOSITORY_TOKEN_RW}@${CI_REPOSITORY_URL#*@}" $BRANCH_NAME
   else
