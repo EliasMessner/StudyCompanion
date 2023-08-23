@@ -19,7 +19,7 @@ def documents_to_unique_metadata(documents: List[Document]):
     for m in metadata:
         metadata_string = ""
         if "page" in m.keys():
-            metadata_string = f"{m['source']} (Page {int(m['page'])})"
+            metadata_string = f"{m['source']} (Page {int(m['page']) + 1})"
         else:
             metadata_string = m['source']
         unique_metadata.append(metadata_string)
