@@ -66,8 +66,8 @@ if st.session_state.messages[-1]["role"] != "assistant":
             full_response += chunk + " "
             time.sleep(0.05)
             # Add a blinking cursor to simulate typing
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
+            message_placeholder.write(full_response + "▌")
+        message_placeholder.write(full_response)
 
         with st.expander("Sources"):
             st.write("\n\n".join(assistant_response['sources']))
