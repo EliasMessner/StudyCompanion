@@ -9,7 +9,7 @@ class FeedbackController:
     def __init__(self, prompt_strategy: PromptStrategy) -> None:
         self.prompt_strategy = prompt_strategy
         self.collector = FeedbackCollector(
-            component_name="default",
+            component_name="production",
             email=os.environ.get("TRUBRICS_EMAIL"),
             password=os.environ.get("TRUBRICS_PASSWORD"),
         )
