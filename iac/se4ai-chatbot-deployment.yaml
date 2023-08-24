@@ -18,6 +18,11 @@ spec:
       containers:
       - name: se4ai-chatbot
         image: mmatkowi/se4ai-chatbot:1.2
+        resources:
+          requests:
+            ephemeral-storage: "2Gi"
+          limits:
+            ephemeral-storage: "2Gi"
         ports:
         - containerPort: 8501
         volumeMounts:
