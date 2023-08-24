@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: se4ai-chatbot
-        image: mmatkowi/se4ai-chatbot:1.2
+        image: mmatkowi/se4ai-chatbot:1.4
         resources:
           requests:
             ephemeral-storage: "2Gi"
